@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>信息检索</title>
+    <span>该页面已弃用，请前往新页面:</span>
+    <span>cd ./frontend</span>
+    <span>npm start</span>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <h1>信息检索</h1>
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="请输入搜索关键词">
+                <button id="search-button">搜索</button>
+            </div>
+            <div id="total-hits"></div>
+            <div id="results"></div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

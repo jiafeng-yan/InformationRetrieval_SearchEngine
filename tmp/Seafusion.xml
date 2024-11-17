@@ -1,0 +1,1900 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xml:space="preserve" xmlns="http://www.tei-c.org/ns/1.0" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://www.tei-c.org/ns/1.0 https://raw.githubusercontent.com/kermitt2/grobid/master/grobid-home/schemas/xsd/Grobid.xsd"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+	<teiHeader xml:lang="en">
+		<fileDesc>
+			<titleStmt>
+				<title level="a" type="main">Image fusion in the loop of high-level vision tasks: A semantic-aware real-time infrared and visible image fusion network</title>
+				<funder ref="#_NQbB4MR">
+					<orgName type="full">National Natural Science Foundation of China</orgName>
+				</funder>
+			</titleStmt>
+			<publicationStmt>
+				<publisher/>
+				<availability  status="unknown">
+					<licence/>
+				</availability>
+				<date>1 January 2022 1566</date>
+			</publicationStmt>
+			<sourceDesc>
+				<biblStruct>
+					<analytic>
+						<author>
+							<persName><forename type="first">Linfeng</forename><surname>Tang</surname></persName>
+							<email>linfeng0419@gmail.com</email>
+							<affiliation key="aff0">
+								<orgName type="department">Electronic Information School</orgName>
+								<orgName type="institution">Wuhan University</orgName>
+								<address>
+									<postCode>430072</postCode>
+									<settlement>Wuhan</settlement>
+									<country key="CN">China</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName><forename type="first">Jiteng</forename><surname>Yuan</surname></persName>
+							<email>yuanjiteng@whu.edu.cn</email>
+							<affiliation key="aff0">
+								<orgName type="department">Electronic Information School</orgName>
+								<orgName type="institution">Wuhan University</orgName>
+								<address>
+									<postCode>430072</postCode>
+									<settlement>Wuhan</settlement>
+									<country key="CN">China</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName><forename type="first">Jiayi</forename><surname>Ma</surname></persName>
+							<affiliation key="aff0">
+								<orgName type="department">Electronic Information School</orgName>
+								<orgName type="institution">Wuhan University</orgName>
+								<address>
+									<postCode>430072</postCode>
+									<settlement>Wuhan</settlement>
+									<country key="CN">China</country>
+								</address>
+							</affiliation>
+						</author>
+						<title level="a" type="main">Image fusion in the loop of high-level vision tasks: A semantic-aware real-time infrared and visible image fusion network</title>
+					</analytic>
+					<monogr>
+						<imprint>
+							<date type="published">1 January 2022 1566</date>
+						</imprint>
+					</monogr>
+					<idno type="MD5">B832B330F0BFE329A572BCFCACAA3CC0</idno>
+					<idno type="DOI">10.1016/j.inffus.2021.12.004</idno>
+					<note type="submission">Received 25 October 2021; Received in revised form 28 November 2021; Accepted 8 December 2021</note>
+				</biblStruct>
+			</sourceDesc>
+		</fileDesc>
+		<encodingDesc>
+			<appInfo>
+				<application version="0.8.1" ident="GROBID" when="2024-11-07T17:48+0000">
+					<desc>GROBID - A machine learning software for extracting information from scholarly documents</desc>
+					<ref target="https://github.com/kermitt2/grobid"/>
+				</application>
+			</appInfo>
+		</encodingDesc>
+		<profileDesc>
+			<textClass>
+				<keywords>Image fusion Semantic aware High-level vision task Gradient residual dense block</keywords>
+			</textClass>
+			<abstract xml:lang="sv">
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Task-driven evaluation</head></div>
+			</abstract>
+		</profileDesc>
+	</teiHeader>
+	<text xml:lang="en">
+		<body>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="1.">Introduction</head><p>Images shot by a single modal sensor fail to effectively and comprehensively describe the imaging scene due to the theoretical and technical limitations <ref type="bibr" target="#b0">[1]</ref>. The infrared sensor captures thermal radiation emitted from objects, which could highlight salient targets, but the infrared image neglects texture and is vulnerable to noise. On the contrary, the visible sensor captures reflective light information. The visible image usually contains abundant texture and structure information but is sensitive to the environment, such as illumination and occlusion. The complementary roles encourage us to fuse infrared and visible images to generate a desired image, which highlights prominent targets as well as manifests abundant detail information. Thus, the infrared and visible image fusion has been broadly used as a preprocessing module for high-level vision tasks, e.g., object detection <ref type="bibr" target="#b1">[2]</ref>, tracking <ref type="bibr" target="#b2">[3]</ref>, pedestrian re-identification <ref type="bibr" target="#b3">[4]</ref> and semantic segmentation <ref type="bibr" target="#b4">[5]</ref>. An example in Fig. <ref type="figure">1</ref> intuitively shows the contribution of fused images to the segmentation task. From the visible image, the segmentation network could segment cars, bikes and several persons but ignore the pedestrian hidden in the darkness. Although the infrared image helps the segmentation network to exactly split cars and all L. Tang et al. Fig. <ref type="figure">1</ref>. An example of infrared and visible image fusion and segmentation. The first row is the source images and the fused images. The second row is the segmentation results of the first row. From left to right: visible image, infrared image, fused images of RFN-Nest <ref type="bibr" target="#b5">[6]</ref>, SDNet <ref type="bibr" target="#b6">[7]</ref>, and our proposed SeAFusion, and ground truth.</p><p>fused images can facilitate high-level vision tasks. Some studies <ref type="bibr" target="#b31">[31]</ref><ref type="bibr" target="#b32">[32]</ref><ref type="bibr" target="#b33">[33]</ref> demonstrate that only considering the visual quality and quantitative metrics could not help with high-level vision tasks. Although some works introduce perceptual loss to constrain the fused image and source images at the feature level <ref type="bibr" target="#b5">[6,</ref><ref type="bibr" target="#b6">7,</ref><ref type="bibr" target="#b23">24,</ref><ref type="bibr" target="#b28">28,</ref><ref type="bibr" target="#b34">34]</ref>, the perceptual loss cannot effectively enhance the semantic information in the fused image, as shown in Fig. <ref type="figure">1</ref>. Moreover, other researchers guide the image fusion process via a segmentation mask <ref type="bibr" target="#b25">[26,</ref><ref type="bibr" target="#b35">35]</ref>, but the mask only splits some salient targets, which is limited for boosting semantic information. On the other hand, the existing evaluation manners are mainly visual comparison and quantitative evaluation. The visual comparison focuses on the contrast and texture detail of the fused image and the quantitative evaluation relies on some statistical metrics to assess fusion performance. However, neither visual comparison nor quantitative evaluation reflects the facilitation of fused images for highlevel vision tasks. In addition, the existing network architectures are not effective in extracting fine-grained detail features. Last but not least, numerous existing fusion algorithms ignore the demand for real-time image fusion while striving for improving visual quality and evaluation metrics.</p><p>In this study, a semantic-aware fusion network, known as SeAFusion, is proposed to achieve real-time infrared and visible image fusion. The key of our method is simultaneously obtaining superior performance in both image fusion and high-level vision tasks. Specifically, we introduce a segmentation network to predict the segmentation results on fused images, which is utilized to construct semantic loss. Then, the semantic loss is leveraged to guide the training of the fusion network via back-propagation, forcing fused images to contain more semantic information. Moreover, in order to meet the demand of high-level vision tasks in real-time, we develop a light-weight network based on gradient residual dense block (GRDB). The GRDB could achieve feature reuse via the main dense stream and boost the description ability for fine-grained details by the residual gradient stream.</p><p>To sum up, the major contributions of this study are summarized as follows:</p><p>• We devise a novel semantic-aware infrared and visible image fusion framework, which effectively achieves superior performance in both image fusion and high-level vision tasks. • A gradient residual dense block is designed to boost the description ability of the network for fine-grained detail and achieve feature reuse. • The proposed SeAFusion is a light-weight model that can achieve real-time image fusion. This allows it to be deployed as a preprocessing module for high-level vision tasks. • We propose a task-driven evaluation manner that evaluates the performance of image fusion from the perspective of high-level vision tasks.</p><p>The remainder of this paper is organized as follows. Section 2 briefly describes the related works of image fusion and task-driven algorithms.</p><p>In Section 3, we introduce our proposed SeAFusion in detail, including the problem analysis, loss function, network architecture and training strategy. Section 4 illustrates the impressive performance of our method in comparison with other alternatives, followed by some concluding remarks in Section 5.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2.">Related work</head><p>In this section, we first review the existing infrared and visible image fusion algorithms. Then, some task-driven low-level vision algorithms are briefly introduced.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2.1.">Image fusion algorithms 2.1.1. Traditional image fusion methods</head><p>Since feature reconstruction is usually an inverse process of feature extraction, the key to traditional image fusion algorithms lies in two vital elements, i.e., feature extraction and fusion. Multi-scale decomposition is the most common transformation scheme for feature extraction. In the past decades, numerous multi-scale transforms such as laplacian pyramid (LP), discrete wavelet <ref type="bibr" target="#b10">[11]</ref>, shearlet <ref type="bibr" target="#b11">[12]</ref>, nonsubsampled contourlet <ref type="bibr" target="#b12">[13]</ref> transform, and latent low-rank representation <ref type="bibr" target="#b14">[15]</ref> have been successfully embedded in the multi-scale transform-based image fusion framework. In addition, sparse representation is exploited as a feature extraction technique, which uses the sparse basis in an overcomplete dictionary to represent source images <ref type="bibr" target="#b15">[16,</ref><ref type="bibr" target="#b36">36]</ref>. Moreover, subspace-based methods have also attracted great attention, which project high-dimensional images into low-dimensional subspace to capture intrinsic structures of source images. Independent component analysis <ref type="bibr" target="#b16">[17]</ref>, principal component analysis <ref type="bibr" target="#b18">[19]</ref>, and non-negative matrix factorization <ref type="bibr" target="#b17">[18]</ref> are the representative methods in the subspace-based fusion framework.</p><p>Beyond the aforementioned methods, the optimization-based methods offer fresh perspectives and prospects for the image fusion community. In particular, Ma et al. defined the infrared and visible image fusion as overall intensity maintenance and texture structure preservation, which lays a solid foundation for CNN-based approaches <ref type="bibr" target="#b25">[26]</ref> and GAN-based approaches <ref type="bibr" target="#b19">[20]</ref>. Moreover, some researchers combined the advantages of different frameworks and proposed hybrid models to pursue better image fusion performance <ref type="bibr" target="#b20">[21,</ref><ref type="bibr" target="#b37">37]</ref>. In particular, Liu et al. developed a general image fusion framework via combining multiscale transform (MST) and sparse representation (SR) to concurrently conquer the inherent defects of both the MST-based and SR-based fusion approaches.</p><p>It is instructive to note that the increasingly complex transformations or representations cannot respond to the demands of real-time image fusion <ref type="bibr" target="#b38">[38]</ref>. Furthermore, the hand-crafted activity level measurements and fusion rules activity level measurements fail to integrate semantic information, which will limit the contribution of fused results to high-level vision tasks.</p><p>L. Tang et al.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2.1.2.">AE-based image fusion methods</head><p>With the superior feature learning ability of the neural network, deep learning has become a new favorite for numerous vision tasks. The image fusion community has also actively explored deep learningbased solutions and developed many promising schemes. The autoencoder (AE)-based framework is a crucial branch, which trains an auto-encoder to achieve feature extraction and reconstruction. Li et al. proposed a simple fusion architecture that consists of three components: encoder layer, fusion layer and decoder layer <ref type="bibr" target="#b21">[22]</ref>. The encoder layer contains a convolutional layer and denseblock to high-level features, in which the denseblock is leveraged to get more useful features in the encoding process. The fusion layer leverages element-wise addition strategy or l1-norm strategy to merge high-level features, and the feature reconstruction network contains four convolutional layers to reconstruct the fused image. Furthermore, they also introduced the multi-scale encoder-decoder architectures and nest connection to extract more comprehensive features <ref type="bibr" target="#b5">[6,</ref><ref type="bibr" target="#b22">23]</ref>. Nevertheless, the aforementioned approaches applied hand-crafted fusion rules to integrate deep features, restraining the fusion performance severely. To address the limitations of manually designed fusion rules, Xu et al. proposed a classification saliency-based rule for AE-based image fusion framework <ref type="bibr" target="#b39">[39]</ref>. The novel fusion rule employs a classifier to measure the saliency of each pixel in feature maps and calculates the fusion weights based on the contribution of each pixel.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2.1.3.">CNN-based image fusion methods</head><p>CNN-based fusion frameworks either achieve implicit feature extraction, aggregation and image reconstruction guided by the elaborate loss function, or employ convolutional neural network (CNN) as part of the overall fusion framework to implement activity level measurements and feature integration. LP-CNN is a pioneer in applying CNN to the image fusion field, which combines the LP with classification-type CNN to achieve medical image fusion <ref type="bibr" target="#b40">[40]</ref>. In addition, Zhang et al. developed a general image fusion framework via the generic network structure, i.e., feature extraction layer, fusion layer and image reconstruction layer <ref type="bibr" target="#b23">[24]</ref>. It is instructive to note that their fusion layer is embedded in the training process. Hence, IFCNN could mitigate the limitation imposed by the manually designed fusion rules (element-wise max, element-wise min, or element-wise mean).</p><p>Moreover, researchers have also explored an alternative solution, i.e., end-to-end CNN-based image fusion framework, to avoid the shortcomings of hand-crafted rules. The CNN-based methods inherit the core concept of traditional optimization-based approaches, which defines the objective function of image fusion as overall intensity fidelity and texture structure preservation <ref type="bibr" target="#b19">[20]</ref>. Zhang et al. modeled the unified image fusion as proportional maintenance of gradient and intensity and designed a general loss function for different image fusion missions <ref type="bibr" target="#b41">[41]</ref>. Based on the gradient and intensity paths, they also devised a squeeze-and-decomposition network to improve the fidelity of fused images <ref type="bibr" target="#b6">[7]</ref>. In addition, an adaptive decision block was introduced to allocate weights for gradient loss terms according to the texture richness of source images. Considering the cross-fertilization between different image fusion missions, Xu et al. trained a unified model for multi-fusion tasks <ref type="bibr" target="#b42">[42]</ref>. In order to reinforce the semantic information in fused images, Ma et al. <ref type="bibr" target="#b25">[26]</ref> leveraged a salient mask to construct the desired information for infrared and visible image fusion. Although the proposed network can detect salient targets, the simple salient target mask only enhances the semantic information of the salient target region. In addition, for the image fusion task it is difficult to provide the ground truth to construct loss functions, which means the CNN-based fusion network cannot release its full potential performance.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2.1.4.">GAN-based image fusion methods</head><p>Since the adversarial loss constructs networks from the perspective of probability distributions, the generative adversarial network is ideal for unsupervised tasks, e.g., image-to-image translation <ref type="bibr" target="#b43">[43,</ref><ref type="bibr" target="#b44">44]</ref> and image fusion <ref type="bibr" target="#b27">[27,</ref><ref type="bibr" target="#b45">45]</ref>. Ma et al. creatively introduced the GAN into the image fusion community, which leverages a discriminator to force the generator to synthesize fused images with abundant textures <ref type="bibr" target="#b27">[27]</ref>. In order to improve the quality of detail information and sharpen the edge of thermal targets, they also introduced the detail loss and edgeenhancement loss <ref type="bibr" target="#b28">[28]</ref>. However, a single discriminator may cause mode collapse, i.e., the fused image is biased towards visible or infrared images. Therefore, Ma et al. further proposed a dual-discriminator conditional generative adversarial network to improve the robustness of the GAN-based framework and maintain the balance between infrared and visible images <ref type="bibr" target="#b29">[29]</ref>. Subsequently, Li et al. integrated a multi-scale attention mechanism, prompting the generator and discriminator to pay more attention to the typical regions, into the GAN-based fusion framework <ref type="bibr" target="#b46">[46]</ref>. In addition, Ma et al. transformed image fusion into a multi-distribution simultaneous estimation problem and achieved the balance between infrared and visible images from the perspective of classifiers <ref type="bibr" target="#b47">[47]</ref>.</p><p>However, both traditional approaches and deep learning-based methods emphasize the improvements of fused image quality and evaluation metrics while ignoring the demands of high-level vision tasks. In practice, a fused image with excellent image quality may be suitable for human visual perception, but may not facilitate highlevel vision tasks. A robust image fusion algorithm should enhance the semantic information of fused images while fully integrating the complementary information in the source images. Some deep learningbased algorithms tried to enhance the semantic information in the fused images via introducing the perceptual loss or salient target masks. But the perceptual loss has limited benefit for semantic information enhancement. In addition, the salient target mask only reinforces the semantic information in the salient target regions. To this end, it is imperative to develop a semantic-aware image fusion algorithm.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2.2.">Task-driven low-level vision algorithms</head><p>In fact, some practical solutions, combining the low-level algorithms with the demands of high-level vision tasks, have been proposed. Li et al. designed a light-weight dehazing network, called AOD-Net, which can easily be embedded into other deep models, e.g., Faster R-CNN, for improving high-level vision tasks on hazy images <ref type="bibr" target="#b48">[48]</ref>. AOD-Net is the first work that explores the correlation between the dehazing algorithms and the high-level vision task performance. Subsequently, Haris et al. explored how image super-resolution can contribute to object detection in low-resolution images <ref type="bibr" target="#b31">[31]</ref>. They developed a novel super-resolution framework where the super-resolution sub-network explicitly incorporates a detection loss in its training objective. Moreover, Liu et al. proposed a task-driven image denoising scheme, which cascaded two modules for image denoising and various high-level vision tasks, and used a joint loss for updating only the parameters of denoising model <ref type="bibr" target="#b49">[49,</ref><ref type="bibr" target="#b50">50]</ref>. Their solution could overcome the performance degradation of high-level vision tasks and generate more visually appealing results with the guidance of high-level vision information. Recently, considering the practical demands of automatic driving, Guo et al. devised a novel deraining framework that contains a semantic refinement residual network and a two-stage segmentation aware joint training strategy <ref type="bibr" target="#b51">[51]</ref>.</p><p>In this work, we devise a semantic-aware real-time infrared and visible image fusion framework to reinforce the semantic information in the fused images. More specifically, we first introduce the semantic loss to integrate more semantic information into fused images. Then, we tailor a joint low-level and high-level adaptive training strategy to maintain the balance of low-level and high-level vision tasks. Finally, our fusion model can generate more visually appealing fused images while achieving excellent performance for high-level vision tasks with the guidance of a semantic loss. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.">Methodology</head><p>We comprehensively describe the semantic-aware real-time infrared and visible image fusion framework in this section. Firstly, we provide the problem formulation of our SeAFusion. Then, the content loss and semantic loss are presented in detail. Afterwards, the architecture of our gradient residual dense block-based fusion network is presented. Finally, we introduce the training strategy in detail.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.1.">Problem formulation</head><p>Given a pair of registered infrared image 𝐼 𝑖𝑟 ∈ R 𝐻×𝑊 ×1 and visible image 𝐼 𝑣𝑖 ∈ R 𝐻×𝑊 ×3 , the image fusion is achieved via feature extraction, aggregation and reconstruction with the guidance of a tailored loss function. Therefore, the quality of the fused image 𝐼 𝑓 ∈ R 𝐻×𝑊 ×3 depends greatly on the loss function. In order to improve fusion performance, we devise a joint loss, consisting of content loss and semantic loss, to constrain the fusion network. The overall framework of our semantic-aware infrared and visible image fusion algorithm is presented in Fig. <ref type="figure" target="#fig_0">2</ref>.</p><p>First of all, a light-weight fusion network based on gradient residual dense block (GRDB) is devised to fully integrate the complementary information in source images. More specifically, we apply a feature extraction module 𝐸 𝐹 to extract deep features with abundant finegrained detail information from infrared and visible images, which can be represented as:</p><formula xml:id="formula_0">{ 𝐹 𝑖𝑟 , 𝐹 𝑣𝑖 } = { 𝐸 𝐹 (𝐼 𝑖𝑟 ), 𝐸 𝐹 (𝐼 𝑣𝑖 ) } ,<label>(1)</label></formula><p>where 𝐹 𝑖𝑟 and 𝐹 𝑣𝑖 mean infrared features and visible features, respectively. Moreover, GRDBs embedded in the feature extraction module, are deployed to boost the description ability for fine-grained details while extracting high-level semantic features (we will discuss its network architecture in Section 3.3). Given the input 𝐹 𝑖 of GRDB, its output 𝐹 𝑖+1 can be denoted as:</p><formula xml:id="formula_1">𝐹 𝑖+1 = 𝐺𝑅𝐷𝐵(𝐹 𝑖 ) = 𝐶𝑜𝑛𝑣 𝑛 (𝐹 𝑖 ) ⊕ 𝐶𝑜𝑛𝑣(∇𝐹 𝑖 ),<label>(2)</label></formula><p>where 𝐶𝑜𝑛𝑣(⋅) indicates the convolutional layer and 𝐶𝑜𝑛𝑣 𝑛 (⋅) stands for 𝑛 cascaded convolution layers. ∇ refers to the gradient operator, i.e., a special convolutional operation whose convolutional kernel is manually devised. The gradient operator convolves the input features with the high-frequency convolution kernel to extract the fine-grained detail information. In this study, the well-known Sobel operator is exploited to compute gradient magnitude. Moreover, ⊕ denotes element-wise summation. GRDB aggregates the learnable convolutional features with gradient magnitude information. Then, the fused image is reconstructed by a feature integration and image reconstruction module. The concatenation fusion strategy is leveraged to integrate the deep infrared and visible features, containing abundant fine-grained spatial details. The fusion process is expressed as follows:</p><formula xml:id="formula_2">𝐹 𝑓 = (𝐹 𝑖𝑟 , 𝐹 𝑣𝑖 ),<label>(3)</label></formula><p>where (⋅) refers to concatenation in the channel dimension. Eventually, the fused image 𝐼 𝑓 is recovered from the fused features 𝐹 𝑓 via the image reconstructor  𝐼 , which is presented as:</p><formula xml:id="formula_3">𝐼 𝑓 =  𝐼 (𝐹 𝑓 ).<label>(4)</label></formula><p>In addition, taking full account of the demands of high-level vision tasks on fused images, we adopt a semantic loss to measure the semantic information contained in the fused image. More specifically, we introduce a segmentation model 𝑁 𝑠 to perform segmentation on the fused image 𝐼 𝑓 ∈ R 𝐻×𝑊 ×3 <ref type="bibr" target="#b52">[52]</ref>. The gap between the segmentation result 𝐼 𝑠 ∈ R 𝐻×𝑊 ×𝐶 and semantic label 𝐿 𝑠 ∈ (1, 𝐶) 𝐻×𝑊 can reflect the richness of the semantic information contained in the fused image, where 𝐻 and 𝑊 are the height and width of an image, respectively, and 𝐶 denotes the number of object categories. Given a fused image 𝐼 𝑓 , the semantic-aware process is denoted as:</p><formula xml:id="formula_4">𝐼 𝑠 = 𝑁 𝑠 (𝐼 𝑓 ).</formula><p>(</p><formula xml:id="formula_5">)<label>5</label></formula><p>The gap between the segmentation result and semantic label is denoted as  𝑠𝑒𝑚𝑎𝑛𝑡𝑖𝑐 and defined as:</p><formula xml:id="formula_6"> 𝑠𝑒𝑚𝑎𝑛𝑡𝑖𝑐 = (𝐼 𝑠 , 𝐿 𝑠 ),<label>(6)</label></formula><p>where (⋅) indicates the error function. More details about the error function will be presented in Section 3.2.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.2.">Loss function</head><p>Our SeAFusion aims to reinforce the semantic information in the fused images while boosting the visual quality and evaluation metrics. In order to achieve these goals, we devise our loss functions from two perspectives. On the one hand, SeAFusion needs to fully integrate complementary information in source images such as the prominent targets in the infrared image and texture details in the visible image. To this end, the content loss is designed to ensure the visual fidelity of fused images. On the other hand, the fused image should effectively facilitate high-level vision tasks. For this purpose, we construct a semantic loss to reflect the degree to that fused images contribute to high-level vision tasks.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.2.1.">Content loss</head><p>In order to promote our fusion model integrate more meaningful information and improve the visual quality and quantitative metrics, we devise a content loss. The content loss consists of two components, i.e., intensity loss  𝑖𝑛𝑡 and texture loss  𝑡𝑒𝑥𝑡𝑢𝑟𝑒 . The exact definition of content loss is expressed as follows:</p><formula xml:id="formula_7"> 𝑐𝑜𝑛𝑡𝑒𝑛𝑡 =  𝑖𝑛𝑡 + 𝛼 𝑡𝑒𝑥𝑡𝑢𝑟𝑒 ,<label>(7)</label></formula><p>where  𝑖𝑛𝑡 constrains the overall apparent intensity of fused images, and  𝑡𝑒𝑥𝑡𝑢𝑟𝑒 forces fused images to contain more fine-grained texture details. Here, 𝛼 is used to strike a balance between the intensity loss  𝑖𝑛𝑡 and texture loss  𝑡𝑒𝑥𝑡𝑢𝑟𝑒 . The intensity loss measures the difference between fused images and source images at the pixel level. Therefore, we define the intensity loss of infrared and visible images as:</p><formula xml:id="formula_8"> 𝑖𝑛𝑡 = 1 𝐻𝑊 ‖ ‖ ‖ 𝐼 𝑓 -max(𝐼 𝑖𝑟 , 𝐼 𝑣𝑖 ) ‖ ‖ ‖1 , (<label>8</label></formula><formula xml:id="formula_9">)</formula><p>where 𝐻 and 𝑊 are the height and width of an image, respectively, ‖⋅‖ 1 stands for the 𝑙 1 -norm and max(⋅) denotes the element-wise maximum selection. We integrate the pixel intensity distribution of infrared and visible images via a maximum selection strategy. Then, the integrated distribution is leveraged to constrain the pixel intensity distribution of the fused image. We expect the fused image to maintain the best intensity distribution and preserve abundant texture details from source images simultaneously. However, the intensity loss only provides a coarsegrained distribution constrain for model learning. Therefore, a texture loss is introduced to force the fused image to contain more fine-grained texture information. The texture loss is defined as:</p><formula xml:id="formula_10"> 𝑡𝑒𝑥𝑡𝑢𝑟𝑒 = 1 𝐻𝑊 ‖ ‖ ‖ |∇𝐼 𝑓 | -max(|∇𝐼 𝑖𝑟 |, |∇𝐼 𝑣𝑖 |) ‖ ‖ ‖1 , (<label>9</label></formula><formula xml:id="formula_11">)</formula><p>where ∇ indicates the Sobel gradient operator, which measures the fine-grained texture information of an image. | ⋅ | refers to the absolute operation. We assume that the optimal texture of the fused image is the maximum aggregate of infrared and visible image textures.</p><p>In conclusion, our fusion network based on gradient residual dense block can simultaneously achieve the optimal intensity distribution and preserve abundant detail information with the guidance of the content loss. In other words, the content loss could effectively guarantee that our model achieves the first goal, i.e., improving the visual quality and statistical evaluation metrics of fused images.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.2.2.">Semantic loss</head><p>Adequately boosting the semantic information of fused images is the greatest innovation in our algorithm. We creatively devise a semantic loss to fulfill this goal. More specifically, we introduce a real-time semantic segmentation model <ref type="bibr" target="#b52">[52]</ref> to split the fused images, and the segmentation network outputs segmentation result 𝐼 𝑠 ∈ R 𝐻×𝑊 ×𝐶 and auxiliary segmentation result 𝐼 𝑠𝑎 ∈ R 𝐻×𝑊 ×𝐶 . The semantic loss consists of two elements, i.e., main semantic loss and auxiliary semantic loss. The primary semantic loss and auxiliary semantic loss are defined as follows:</p><formula xml:id="formula_12"> 𝑚𝑎𝑖𝑛 = -1 𝐻 × 𝑊 𝐻 ∑ ℎ=1 𝑊 ∑ 𝑤=1 𝐶 ∑ 𝑐=1 𝐿 (ℎ,𝑤,𝑐) 𝑠𝑜 log(𝐼 (ℎ,𝑤,𝑐) 𝑠 ),<label>(10)</label></formula><formula xml:id="formula_13"> 𝑎𝑢𝑥 = -1 𝐻 × 𝑊 𝐻 ∑ ℎ=1 𝑊 ∑ 𝑤=1 𝐶 ∑ 𝑐=1 𝐿 (ℎ,𝑤,𝑐) 𝑠𝑜 log(𝐼 (ℎ,𝑤,𝑐) 𝑠𝑎 ),<label>(11)</label></formula><p>where 𝐿 𝑠𝑜 ∈ R 𝐻×𝑊 ×𝐶 denotes a one-hot vector transformed from the segmentation label 𝐿 𝑠 ∈ (1, 𝐶) 𝐻×𝑊 . The main semantic loss and auxiliary loss reflect the semantic information contained in the fused images from different perspectives. Ultimately, the semantic loss is expressed as follows:</p><formula xml:id="formula_14"> 𝑠𝑒𝑚𝑎𝑛𝑡𝑖𝑐 =  𝑚𝑎𝑖𝑛 + 𝜆 𝑎𝑢𝑥 , (<label>12</label></formula><formula xml:id="formula_15">)</formula><p>where 𝜆 is a constant for balancing the main semantic loss and auxiliary semantic loss, which is set to 0.1 referring to the original paper <ref type="bibr" target="#b52">[52]</ref>.</p><p>It is worth remarking that beyond constraining the fusion network, semantic loss is also deployed to train the segmentation model. More detailed descriptions of loss functions and network architecture for the segmentation model refer to <ref type="bibr" target="#b52">[52]</ref>. Finally, a joint loss is constructed to guide the training of fusion model, which is defined as:</p><formula xml:id="formula_16"> 𝑗𝑜𝑖𝑛𝑡 =  𝑐𝑜𝑛𝑡𝑒𝑛𝑡 + 𝛽 𝑠𝑒𝑚𝑎𝑛𝑡𝑖𝑐 , (<label>13</label></formula><formula xml:id="formula_17">)</formula><p>where 𝛽 is a hyper-parameter characterizing the importance of semantic loss  𝑠𝑒𝑚𝑎𝑛𝑡𝑖𝑐 . It is important to emphasize that 𝛽 increases progressively according to the joint low-level and high-level adaptive training strategy since the segmentation network becomes adaptive with the fusion model as training progresses. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.3.">Network architecture</head><p>To achieve real-time image fusion, we propose a light-weight infrared and visible image fusion network based on GRDB, which is illustrated in Fig. <ref type="figure" target="#fig_1">3</ref>. Our fusion network consists of a feature extractor and image reconstructor, where the feature extractor contains two GRDBs to extract fine-grained features.</p><p>As shown in Fig. <ref type="figure" target="#fig_1">3</ref>, the feature extractor involves two parallel infrared and visible feature extraction streams, and each containing a common convolutional layer and two GRDBs. The common convolutional layer, whose kernel size is 3 × 3 and activate function is Leaky Rectified Linear Unit (LReLU), is deployed to extract shallow features. Immediately following are two GRDBs for extracting finegrained features from the shallow features. The specific design of GRDB is illustrated in Fig. <ref type="figure" target="#fig_2">4</ref>. The gradient residual dense block is a variant of resblock <ref type="bibr" target="#b25">[26]</ref>, where the main stream employs the dense connection and the residual stream integrates the gradient operation. We can observe from Fig. <ref type="figure" target="#fig_2">4</ref> that the main stream deploys two 3 × 3 convolutional layers with LReLU and one common convolutional layer whose kernel size is 1 × 1. It should be emphasized that we introduce the dense connection into the main stream to make full use of features extracted by various convolutional layers. The residual stream employs a gradient operation to calculate the gradient magnitude of features and a 1 × 1 regular convolutional layer to eliminate channel dimensional differences. Then, adding the outputs of the main dense stream and residual gradient stream via an element-wise addition to integrate deep features and fined-grained detail features.</p><p>Subsequently, the fine-grained features of infrared and visible images are integrated via the concatenation strategy, and the results are fed into the image reconstructor to achieve feature aggregation and image reconstruction. The image reconstructor consists of three tandem 3 × 3 convolutional layers and one 1 × 1 convolutional layer. All 3 × 3 convolutional layers employ LReLU as the activation function, while the activation function of the 1 × 1 convolutional layer is Tanh.</p><p>It is well-known that information loss is a catastrophic issue in the image fusion task. Therefore, the padding in our fusion network is set as same, and stride is set to 1 except for 1 × 1 convolutional layers. As a result, our network does not introduce any down-sampling, and the size of fused images is consistent with source images. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.4.">Joint low-level and high-level adaptive training strategy</head><p>The existing task-driven low-level vision methods either adopt a pretrained high-level model to guide the training of low-level vision task models or joint train low-level and high-level vision task models in one stage. However, in the image fusion field it is difficult to provide the ground truth of fused images for training a high-level vision task model. In addition, one stage joint training strategy may lead to difficulties in maintaining the balance of performance between low-level and highlevel vision tasks. To this end, we devise a joint low-level and high-level training strategy to train our fusion network. More specifically, we iteratively train the fusion network and segmentation network, and set the iterations to 𝑀. Firstly, all parameters in the fusion network are optimized by the Adam optimizer with the guidance of the joint loss. Moreover, the hyper-parameter 𝛽 of joint loss is dynamically adjusted with the iteration, which is expressed as follows:</p><formula xml:id="formula_18">𝛽 = 𝛾 × (𝑚 -1),<label>(14)</label></formula><p>where 𝑚 denotes the 𝑚th iteration. 𝛽 increases gradually as training progresses due to the fact that the segmentation network fits the fusion model better as iterations increase, and the semantic loss can guide the fusion network training more exactly. 𝛾 is a constant for balancing the semantic loss and content loss. Then, given the current fused results, the parameters of the segmentation model are updated via optimizing the semantic loss. In each iteration, the training steps of the fusion model and segmentation model are 𝑝 and 𝑞, respectively. The joint low-level and high-level adaptive training strategy is summarized in Algorithm 1.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.">Experimental validation</head><p>In this section, we first provide the experimental configurations and implementation details. Then, we present some comparative experiments and generalization experiments to reveal the superiority of our proposed SeAFusion. In addition, some task-driven evaluation experiments are performed to evaluate different fusion methods from the perspective of high-level vision tasks. Next, we compare the running efficiency of different approaches to verify the superiority of our lightweight network for real-time image fusion. Finally, some ablation studies are performed to demonstrate the effectiveness of our specific designs, including the semantic loss, gradient residual dense block and joint low-level and high-level adaptive training strategy. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.1.">Experimental configurations</head><p>To comprehensively evaluate the proposed algorithm, we perform extensively qualitative and quantitative experiments on the MFNet <ref type="bibr" target="#b4">[5]</ref>, RoadScene <ref type="bibr" target="#b42">[42]</ref> and TNO <ref type="bibr" target="#b53">[53]</ref> datasets. We compare our method with nine state-of-the-art approaches, including two traditional approaches, i.e., GTF <ref type="bibr" target="#b19">[20]</ref> and MST-SR <ref type="bibr" target="#b37">[37]</ref>, two AE-based approaches, i.e., DenseFuse <ref type="bibr" target="#b21">[22]</ref>, and RFN-Nest <ref type="bibr" target="#b5">[6]</ref>, two GAN-based approaches, i.e., FusionGAN <ref type="bibr" target="#b27">[27]</ref> and GANMcC <ref type="bibr" target="#b47">[47]</ref>, and three CNN-based methods, i.e., IFCNN <ref type="bibr" target="#b23">[24]</ref>, U2Fusion <ref type="bibr" target="#b42">[42]</ref> and SDNet <ref type="bibr" target="#b47">[47]</ref>. The implementations of all these nine methods are publicly available, and we set the parameters as reported in the original papers. It is worth noting that we adopt Laplace pyramid (LP) as the multi-scale transformation (MST) in MST-SR. The element-wise addition, element-wise maximum fusion strategy, and residual fusion network (RFN) are deployed to integrate the deep features for DenseFuse, IFCNN, and RFN-Nest, respectively.</p><p>Six statistical evaluation metrics are selected to quantify the evaluation, including entropy (EN) <ref type="bibr" target="#b54">[54]</ref>, mutual information (MI) <ref type="bibr" target="#b55">[55]</ref>, visual information fidelity (VIF) <ref type="bibr" target="#b56">[56]</ref>, spatial frequency (SF) <ref type="bibr" target="#b57">[57]</ref>, standard deviation (SD) and 𝑄 𝑎𝑏𝑓 . EN measures the amount of information contained in the fused image, and MI takes stock of the amount of information transferred from the source images to the fused image. Both EN and MI evaluate the fusion performance from the information theory perspective. VIF evaluates the information fidelity of the fused image from the perspective of the human visual system. SF measures the spatial frequency information contained in the fused images. SD reflects the distribution and contrast of fused images from the statistical perspective. 𝑄 𝑎𝑏𝑓 takes stock of the amount of edge information transferred from source images to the fused image. EN, SF and SD are reference-free metrics. Moreover, a fusion algorithm with larger EN, MI, VIF, SF, SD and 𝑄 𝑎𝑏𝑓 indicates better fusion performance.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.2.">Implementation details</head><p>We train our semantic-aware fusion network on the MFNet dataset. The training set contains 1083 pairs of infrared and visible images and the testing set consists of 361 image pairs. The MFNet dataset provides semantic labels for nine objects, i.e., car, person, bike, curve, car stop, guardrail, color Tone and background. Moreover, all images are normalized to [0, 1] before being fed into networks.</p><p>We iteratively train the fusion network and the segmentation network according to the joint low-level and high-level adaptive training strategy. All parameters in our joint adaptive training strategy are set as follows: 𝑀 = 4, 𝑝 = 2, 700, 𝑞 = 20,000 and 𝛾 = 1. In addition, the hyper-parameter of the content loss is set as 𝛼 = 10. We leverage Adam optimizer with a batch size of 8, 𝛽1 of 0.9, 𝛽2 of 0.99, epsilon of 1𝑒 -8 , weight decay of 0.0002, the initial learning rate of 0.001 to optimize our fusion model with the guidance of joint loss. Furthermore, we utilize mini-batch stochastic gradient descent with a batch size of 16, momentum of 0.9, and weight decay of 0.0005 to optimize the segmentation network. The initial learning rate is set as 0.01 and the learning rate is updated by the initial learning rate multiplied by (1 -𝑖𝑡𝑒𝑟 𝑚𝑎𝑥 𝑖𝑡𝑒𝑟 ) 𝑝𝑜𝑤𝑒𝑟 , where power is set as 0.9 <ref type="bibr" target="#b52">[52]</ref>. The proposed method is implemented on the PyTorch platform <ref type="bibr" target="#b58">[58]</ref>. All experiments are conducted on the NVIDIA TITAN RTX GPU and 3.50 GHz Intel(R) Core(TM) i9-9920X CPU.</p><p>We use a special strategy <ref type="bibr" target="#b59">[59]</ref> to process color information since the MFNet and RoadScene datasets contain color visible images. More specifically, we first convert visible images to the YCbCr color space. Then, different fusion algorithms are leveraged to fuse the Y channel of visible images and infrared images. Finally, the fused image can be converted into the RGB color space with Cb and Cr channels of visible images. Moreover, we feed the RGB fused image into the segmentation model directly.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.3.">Comparative experiment</head><p>In order to sufficiently evaluate the fusion performance of our method, we first compare the proposed SeAFusion with other nine algorithms on the MFNet dataset.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.3.1.">Qualitative results</head><p>The MFNet dataset contains two typical scenes, i.e., the daytime scene and nighttime scene. To intuitively exhibit the superiority of our fusion framework in integrating complementary information and improving the visual quality of fused images, we select two daytime scenes and two nighttime scenarios for subjective evaluation. The visualized results are presented in Figs. <ref type="figure" target="#fig_4">5</ref><ref type="figure" target="#fig_5">6</ref><ref type="figure" target="#fig_6">7</ref><ref type="figure" target="#fig_7">8</ref>. In daytime scenes, thermal radiation information of infrared images can be leveraged as supplementary information for visible images. Therefore, a fused image with pleasing visual quality should contain abundant texture detail of the visible image and enhance prominent targets in the infrared image. As presented in Figs. <ref type="figure" target="#fig_4">5</ref> and<ref type="figure" target="#fig_5">6</ref>, GTF and FusionGAN cannot preserve texture detail of visible images, and FusionGAN fails to sharpen the edge of prominent targets. Although DenseFuse, RFN-Nest, GANMcC, U2Fusion and SDNet integrate the detail information of visible images with the thermal radiation information of infrared images, both types of information are inevitably interfered with by useless information during the fusion process. We zoom in on a region with the red box to illustrate the phenomenon that texture details suffer from varying degrees of spectral contamination. In addition, a salient area is highlighted by a green box to reveal the issue of useless information weakening prominent targets. Only our SeAFusion and MST-SR could preserve abundant texture details while highlighting prominent targets. Unfortunately, MST-SR is vulnerable to contamination by thermal radiation information in some background regions (e.g., the ground in Figs. <ref type="figure" target="#fig_4">5</ref> and<ref type="figure" target="#fig_5">6</ref>). Thus, only our method can effectively integrate the complementary information from source images and guarantee the visual quality of the fused image simultaneously.</p><p>In the nighttime scenarios, both infrared and visible images only provide limited scene information. Thus, it is a challenge to integrate meaningful information from infrared and visible images adaptively. As shown in Figs. <ref type="figure" target="#fig_6">7</ref> and<ref type="figure" target="#fig_7">8</ref>, we can observe that all algorithms merge the complementary information in infrared and visible images to some extent, but there are still some slight variations in fused results of different algorithms. In particular, GTF and FusionGAN blur the contours of thermal radiation targets, and the texture region of GTF suffers from severe spectral contamination. Except for our SeAFusion, other methods introduce some useless information into the fused images, which are reflected in the contamination of detailed textures and the weakening of salient targets. We zoom in on a textured area (i.e., the red box) and highlight a target (i.e, the green box) to display the aforementioned issues. It is worth emphasizing that our SeAFusion purposely integrates the meaningful information in source images with guidance of semantic loss and generates fused images containing abundant semantic information. Furthermore, the fused images synthesized by our fusion model contain abundant texture details, benefiting from the powerful description capability of the gradient residual dense block for fine-grained details.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.3.2.">Quantitative results</head><p>The quantitative results of six statistical metrics on 361 image pairs are displayed in Fig. <ref type="figure" target="#fig_8">9</ref>. One can notice that our method exhibits significant superiority in four metrics, i.e., EN, MI, VIF and 𝑄 𝑎𝑏𝑓 . The best EN indicates fused images generated by SeAFusion contain the most information, and the highest MI means our method transfers the most information from source images to fused images. Moreover, our SeAFusion presents the best VIF, which indicates that our fused images are more consistent with the human visual system. Furthermore, the proposed approach achieves the best 𝑄 𝑎𝑏𝑓 , which implies that more edge information is preserved in the fused results, benefiting from the powerful fine-grained feature extraction ability of GRDB. In addition, our SeAFusion exhibits the best SD, meaning our fused images have the highest contrast. Our method only follows IFCNN and MST-SR by a narrow margin in the SF metric. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.4.">Generalization experiment</head><p>It is well known that generalization performance is an essential aspect in evaluating deep learning-based methods. Therefore, we provide generalization experiments on the RoadScene and TNO datasets to demonstrate the generalizability of the proposed SeAFusion. Noteworthy, our fusion model is trained on the MFNet dataset and tested directly on RoadScene and TNO datasets.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.4.1.">Qualitative results</head><p>The qualitative comparisons of different algorithms on the Road-Scene dataset are shown in Figs. <ref type="figure" target="#fig_9">10</ref> and<ref type="figure" target="#fig_10">11</ref>. Almost all methods introduce meaningless information in the fusion process, which is manifested by texture areas suffering from thermal radiation contamination and weakened salient targets. In order to intuitively exhibit the effect of meaningless information for fused images, we zoom in on an area with rich texture details in a red box and highlight a prominent target in the green box. We can observe that texture details in the background regions are disturbed by thermal radiation information. GTF, DenseFuse, RFN-Nest, FusionGAN, GANMcC and SDNet are particularly evident. Moreover, the intensity information of salient targets is weakened to varying degrees. GTF and FusionGAN cannot retain the sharpened edge of targets. It is worth mentioning that MST-SR, IFCNN, U2Fusion and SeAFusion suffer from only minor interference of useless information. In particular, our fused results are similar to visible images in background areas, and the pixel intensities of salient targets are consistent with infrared images.</p><p>The visualized results of different methods on the TNO dataset are shown in Figs. <ref type="figure" target="#fig_0">12</ref> and<ref type="figure" target="#fig_1">13</ref>. As can be seen from the green box, MST-SR, DenseFuse, RFN-Nest and U2Fusion severely weaken the salient targets. Moreover, FusionGAN and GANMcC blur the edge of thermal targets. In addition, the fused images generated by other methods suffer from serious spectral contamination in the background regions, e.g., the bush in Fig. <ref type="figure" target="#fig_1">13</ref>. Only our method successfully preserves the texture details of visible images and maintains the intensity of salient targets.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.4.2.">Quantitative results</head><p>We also select 25 image pairs from the RoadScene and TNO datasets for quantitative evaluation, respectively. The comparative results of different methods on the six metrics are displayed in Figs. <ref type="figure" target="#fig_12">14</ref> and<ref type="figure" target="#fig_13">15</ref>. From Fig. <ref type="figure" target="#fig_12">14</ref>, we can notice that SeAFusion presents remarkable superiority in EN, MI, VIF, SF and SD on the RoadScene dataset. Such phenomena mean our fused images not only contain abundant information and texture details but also have the highest contrast and the best visual quality. Moreover, SeAFusion ranks second in 𝑄 𝑎𝑏𝑓 , which implies that our method transfers sufficient edge information from source images to fused images.</p><p>As shown in Fig. <ref type="figure" target="#fig_13">15</ref>, SeAFusion ranks first in EN, MI, VIF and 𝑄 𝑎𝑏𝑓 metrics by a significant margin on the TNO dataset. For the SD metric, our method still ranks first, although the advantage is not particularly pronounced. Finally, the proposed method only follows IFCNN by a narrow margin in the SF metric.</p><p>In conclusion, extensive qualitative and quantitative results on various datasets demonstrate the superiority of our method in terms of prominent target maintenance and texture preservation. We attribute the advantage to the following aspects. On the one hand, we define a content loss consisting of the intensity loss and texture loss to constrain the fusion network to effectively integrate meaningful information from the perspective of pixel intensity distribution and high-order texture detail. On the other hand, our fusion network can adaptively merge complementary features in conjunction with semantic information with the guidance of semantic loss. Finally, the elaborate gradient residual dense block is deployed to enhance the description ability of the network for fine-grained details.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.5.">Task-driven evaluation</head><p>The fused images are utilized not only for visual observations but also for high-level vision tasks. However, the existing evaluation manners only concentrate on the visual quality of fused images and statistical metrics. In this section, we break away from the restraints of existing assessment manners and propose a task-driven evaluation criterion. More specifically, we perform semantic segmentation and object detection on fused images and compute the segmentation or detection performance of different fusion methods.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.5.1.">Segmentation performance</head><p>For fair comparisons, we re-train the segmentation network <ref type="bibr" target="#b52">[52]</ref> for different fusion algorithms on the original MFNet dataset. The configuration of the training and testing sets is consistent with that used for training our SeAFusion. Firstly, we generate the fused images using each fusion method. Then, eleven segmentation models are trained with 80,000 steps on the infrared, visible and nine fused image training sets, respectively. Our SeAFusion employs the joint low-level and highlevel adaptive training strategy to jointly train the fusion model and segmentation model, and the segmentation network is also trained with 80,000 steps. The segmentation performance is measured by pixel intersection-over-union (IoU). The segmentation-driven evaluation results are reported in Table <ref type="table" target="#tab_0">1</ref>. One can observe that our algorithm achieves the highest IoU in almost all categories and ranks first in mIoU. We attribute the advantage to two points. On the one hand, the complementary information of infrared and visible images is completely merged by our fusion network. The complementary information helps segmentation models to understand imaging scenes comprehensively, which is an important reason why fusion can improve segmentation performance. On the other hand, our SeAFusion adaptively integrates the meaningful/semantic information with the guidance of semantic loss. Therefore, our fused images contain abundant semantic information, allowing the segmentation network to describe the imaging scenes more accurately. We believe boosting the semantic information in the fused images is the core factor that elevates our method ahead of other algorithms in segmentation performance.</p><p>In addition, we also provide some visualized examples to show the segmentation results on infrared, visible and different fused images. We only present the segmentation results of five representative fusion algorithms, i.e., GTF, FusionGAN, DenseFuse, IFCNN and SDNet, as shown in Fig. <ref type="figure" target="#fig_14">16</ref>. From the results, we can find that infrared images provide more information about prominent targets such as pedestrians, while visible images could offer a better description for backgrounds (e.g., cars, bikes and color cones). The excellent fusion algorithms can integrate complementary information from source images and achieve a   more comprehensive description for imaging scenes. Thus, the segmentation model could obtain better segmentation results on fused images. It is worth mentioning that our fusion method fully merges the semantic information of source images during the fusion process. Therefore, the segmentation model can generate more accurate segmentation results on our fused images, e.g., the car stops in 00127D scenario, the color cone and bikes in 00504D scene and the bicycles in 01066N scenario. Besides the re-trained segmentation models, Deeplab-V3+ <ref type="bibr" target="#b60">[60]</ref>, trained on the Cityscapes dataset <ref type="bibr" target="#b61">[61]</ref>, is also leveraged to measure the contribution of various fusion algorithms to high-level vision tasks. Visible images, infrared images, and fused results of different fusion methods are directly input into Deeplabv3+, respectively. The visualized results are reported in Fig. <ref type="figure" target="#fig_16">17</ref>. Since DeeplabV3+ is trained on a L. Tang et al.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Table 2</head><p>Object detection performance (mAP) of visible, infrared and fused images on the MFNet dataset. The best result is indicated by RED and the second best result is represented by BLUE. AP@0.5 AP@0.7 AP@0.9 mAP@[0.  visible image dataset, a fusion algorithm that can withstand thermal radiation interference will achieve better segmentation performance. One can focus on the sky of the 00275D scene to find this phenomenon. Moreover, a practical fusion method could integrate the semantic information from source images to improve the ability of the segmentation model for understanding scenarios. The advantage of our method in enhancing semantic information is exemplified by the traffic signs in the 00119D scenario.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.5.2.">Detection performance</head><p>The performance of object detection, a general high-level computer vision task, also reflects well the semantic information integrated into the fused images. Therefore, a state-of-the-art detector, i.e., YOLOv5 <ref type="bibr" target="#b62">[62]</ref> is employed to evaluate object detection performance on the fused images. We randomly select 80 images from the MFNet dataset as the test set, which almost describe all urban scenarios. We manually annotate these images with two critical categories, i.e., person and car. Infrared images, visible images and fused results of various fusion methods are directly input into the YOLOv5 detector, respectively. The mean average precision (mAP) is utilized to measure the detection performance. The detection-driven evaluation results are presented in Table <ref type="table">2</ref>, where mAP@0.5, mAP@0.7 and mAP@0.9 indicate the mAP values at IoU thresholds of 0.5, 0.7 and 0.9, respectively, and mAP@[0.5:0.95] denotes the average of all mAP values at different IoU thresholds (from 0.5 to 0.95 in steps of 0.05).</p><p>From the results, we can find that infrared images have the best mAP values on the person at almost all IoU thresholds, which means infrared images could offer the detector sufficient semantic information about salient targets (e.g., person). However, the detection results of infrared images on the car are disappointing. Fortunately, visible images can provide the detector with a great deal of semantic information about the car. Different fusion algorithms can integrate the complementary information of infrared and visible images, so that the detection performance of fused images on the car is satisfactory. However, the irrelevant information in the fusion process will weaken the salient target, so the fused images give degraded detection results on the person compared to the infrared images. It is worth emphasizing that our semantic-aware fusion framework can achieve intensity maintenance and texture preservation guided by the content loss and defense against interference from meaningless information with the guidance of the semantic loss. Thus, our detection performance on the person only lags behind infrared images by a narrow margin. And our fused results lead the pack in terms of car detection and average detection accuracy.</p><p>Moreover, we also provide some visualized examples in Fig. <ref type="figure" target="#fig_17">18</ref> to illustrate the advantages of our fusion algorithm in facilitating object detection. In 00479D scene, the detector fails to detect the pedestrians from the visible image due to illumination factors. While GTF and FusionGAN cannot maintain the sharpened edges of pedestrian, DenseFuse and RFN-Nest weaken the salient targets due to the interference of negative information. Therefore, the detector is also unable to detect the person from the fused images generated by the above methods. On the contrary, our approach can fully integrate the semantic information in source images while maintaining the optimal intensity distribution and preserving abundant texture details. Hence, the detector detects all objects from our fused image and improves the confidence compared to the source images. A similar phenomenon occurs in 00689N scenario. It is worth noting that our fused results significantly improve the confidence of detection results, which indicates that our fused images could provide more semantic information for the detector.   </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.6.">Efficiency comparison</head><p>As mentioned above, our fusion model is a light-weight network, which can achieve real-time image infusion. To this end, we provide the average running times of different algorithms in Table <ref type="table" target="#tab_2">3</ref> to demonstrate our efficiency advantage. One can find that all deep learning-based algorithms present noticeable running efficiency, benefiting from the GPU acceleration. In addition, our SeAFusion is the fastest method on all three datasets. We attribute this superiority to two factors: the light-weight network design and the PyTorch-based algorithm implementation. Therefore, our algorithm could be easily deployed as a pre-processing module for high-level vision tasks.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.7.">Ablation studies 4.7.1. Semantic loss analysis</head><p>Our light-weight fusion network could boost the semantic information in the fused images with the guidance of semantic loss. In order to verify the particular role of semantic loss, we devise an ablation study on semantic loss. More specifically, we train a fusion model only guided by the content loss. Some typical examples are displayed in Fig. <ref type="figure" target="#fig_18">19</ref>. We can notice that the fusion network cannot purposefully preserve the meaningful information of source images without the guidance of semantic loss. This is specifically manifested by smoothed texture details in background regions and the weakened salient targets. We also provide segmentation results in Table <ref type="table" target="#tab_3">4</ref>, where Without Semantic Loss indicates that we only utilize the content loss to train the fusion network, to demonstrate the vital role of semantic loss for facilitating high-level vision tasks. We only present IoU for the person, car and bike and mIoU for all categories. One can find that the segmentation performance on fused images degrades significantly without the guidance of semantic loss. In contrast, our SeAFusion achieves salient target intensity maintenance and texture preservation while effectively improving the segmentation performance on fused images.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.7.2.">Gradient residual dense block analysis</head><p>Another critical component in our fusion network is the GRDB, which reinforces the description capability of the network for finegrained details. To this end, we also implement an ablation study on GRDB and present the visualized results in Fig. <ref type="figure" target="#fig_18">19</ref>. In the ablation experiment, we remove the residual gradient stream from GRDB. From the visualized examples, we can find that the fused images could maintain a proper intensity distribution, but fail to effectively preserve texture details in the background. On the contrary, the proposed SeA-Fusion simultaneously maintains the intensity distribution of prominent targets and enhances the description of texture details.</p><p>In conclusion, our SeAFusion purposely achieves intensity distribution retention and texture detail preservation while promoting the segmentation performance on fused images, which is benefited from our special designs, i.e., the semantic loss and gradient residual dense block.     </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5.">Conclusion</head><p>In this study, a semantic-aware image fusion framework termed SeAFusion is proposed to achieve real-time infrared and visible image fusion. On the one hand, a gradient residual dense block is devised to boost the description ability of the fusion network for fine-grained details. Combined with the elaborate content loss, our fusion network effectively achieves salient target intensity maintenance and texture detail preservation. On the other hand, we introduced a semantic loss to improve the facilitation of fused results for high-level vision tasks. More specifically, the semantic loss allows high-level semantic information to flow back to the image fusion module, which benefits high-level vision tasks in achieving superior performance on the fused results. Moreover, we proposed a joint low-level and high-level adaptive training strategy to achieve simultaneously impressive performance in both image fusion and various high-level vision tasks. Extensive comparative and generalization experiments demonstrate the superiority of our SeAFusion over state-of-the-art competitors in both subjective effect and quantitative metrics. In addition, abundant task-driven evaluation experiments reveal the natural strengths of our framework in facilitating high-level vision tasks. Furthermore, the remarkable advantage in running efficiency allows our algorithm to be easily deployed as a pre-processing module for high-level vision tasks.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>CRediT authorship contribution statement</head><p>Linfeng Tang: Conceptualization, Methodology, Experiment, Writing. Jiteng Yuan: Experiment. Jiayi Ma: Conceptualization, Methodology, Revised the manuscript.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Declaration of competing interest</head><p>The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.</p></div><figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_0"><head>Fig. 2 .</head><label>2</label><figDesc>Fig. 2. The overall framework of the proposed semantic-aware infrared and visible image fusion algorithm.</figDesc><graphic coords="4,44.55,55.79,237.36,66.82" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_1"><head>Fig. 3 .</head><label>3</label><figDesc>Fig. 3. The architecture of the real-time infrared and visible image fusion network based on gradient residual dense block.</figDesc><graphic coords="5,69.69,55.79,456.00,110.88" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_2"><head>Fig. 4 .</head><label>4</label><figDesc>Fig. 4. The specific devise of the gradient residual dense block. The Sobel operator is selected as the Gradient Operator to extract fine-grained detail information of feature maps.</figDesc><graphic coords="5,337.75,200.39,188.88,88.56" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_3"><head>Algorithm 1 : 2 for 𝑝 steps do 3 Select; 4 Select; 5 6 7 end 8 9 for 𝑞 steps do 10 Select</head><label>1234578910</label><figDesc>Joint low-level and high-level adaptive training strategy Input: Infrared images 𝐼 𝑖𝑟 and visible images 𝐼 𝑣𝑖 Output: Fused images 𝐼 𝑓 1 for 𝑚 ⩽ Max iterations 𝑀 do 𝑏 infrared images {𝐼 1 𝑖𝑟 , 𝐼 2 𝑖𝑟 , … , 𝐼 𝑏 𝑖𝑟 }𝑏 visible images {𝐼 1 𝑣𝑖 , 𝐼 2 𝑣𝑖 , … , 𝐼 𝑏 𝑣𝑖 }Update the weight of semantic loss 𝛽 according to Eq. (14); Update the parameters of the fusion network 𝑁  by AdamOptimizer: ▽ 𝑁  ( 𝑗𝑜𝑖𝑛𝑡 (𝑁  )); Generate fused images from infrared and visible images in the training set; 𝑏 fused images {𝐼 1 𝑓 , 𝐼 2 𝑓 , … , 𝐼 𝑏 𝑓 }; 11 Update the parameters of the segmentation network 𝑁  by SGD Optimizer: ▽ 𝑁  ( 𝑠𝑒𝑚𝑎𝑛𝑡𝑖𝑐 (𝑁  ));</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_4"><head>Fig. 5 .</head><label>5</label><figDesc>Fig. 5. Qualitative comparison of SeAFusion with 9 state-of-the-art methods on 00537D image from the MFNet dataset. (For interpretation of the references to color in this figure legend, the reader is referred to the web version of this article.)</figDesc><graphic coords="6,313.85,55.79,236.64,159.41" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_5"><head>Fig. 6 .</head><label>6</label><figDesc>Fig. 6. Qualitative comparison of SeAFusion with 9 state-of-the-art methods on 00633D image from the MFNet dataset. (For interpretation of the references to color in this figure legend, the reader is referred to the web version of this article.)</figDesc><graphic coords="7,44.26,55.79,237.84,160.27" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_6"><head>Fig. 7 .</head><label>7</label><figDesc>Fig. 7. Qualitative comparison of SeAFusion with 9 state-of-the-art methods on 00858N image from the MFNet dataset. (For interpretation of the references to color in this figure legend, the reader is referred to the web version of this article.)</figDesc><graphic coords="7,313.27,55.79,237.84,160.27" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_7"><head>Fig. 8 .</head><label>8</label><figDesc>Fig. 8. Qualitative comparison of SeAFusion with 9 state-of-the-art methods on 01024N image from the MFNet dataset. (For interpretation of the references to color in this figure legend, the reader is referred to the web version of this article.)</figDesc><graphic coords="8,44.26,55.79,237.84,160.27" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_8"><head>Fig. 9 .</head><label>9</label><figDesc>Fig. 9. Quantitative comparisons of the six metrics, i.e., EN, MI, VIF, SF, SD and 𝑄 𝑎𝑏𝑓 , on 361 image pairs from the MFNet dataset. A point (𝑥, 𝑦) on the curve denotes that there are 100 * 𝑥 percent of image pairs which have metric values no more than 𝑦.</figDesc><graphic coords="9,69.69,55.79,456.00,186.62" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_9"><head>Fig. 10 .</head><label>10</label><figDesc>Fig. 10. Qualitative comparison of SeAFusion with 9 state-of-the-art methods on FLIR_06832 from the RoadScene dataset. (For interpretation of the references to color in this figure legend, the reader is referred to the web version of this article.)</figDesc><graphic coords="9,45.48,455.96,235.44,145.73" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_10"><head>Fig. 11 .</head><label>11</label><figDesc>Fig. 11. Qualitative comparison of SeAFusion with 9 state-of-the-art methods on FLIR_08835 from the RoadScene dataset. (For interpretation of the references to color in this figure legend, the reader is referred to the web version of this article.)</figDesc><graphic coords="9,313.27,446.89,237.84,185.33" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_11"><head>Fig. 12 .Fig. 13 .</head><label>1213</label><figDesc>Fig. 12. Visualized results of SeAFusion compared with 9 state-of-the-art algorithms on Kaptein_1123 from the TNO dataset. (For interpretation of the references to color in this figure legend, the reader is referred to the web version of this article.)</figDesc><graphic coords="10,44.26,226.80,237.84,160.27" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_12"><head>Fig. 14 .</head><label>14</label><figDesc>Fig. 14. Quantitative comparisons of the six metrics, i.e., EN, MI, VIF, SF, SD and 𝑄 𝑎𝑏𝑓 , on 25 image pairs from the RoadScene dataset. A point (𝑥, 𝑦) on the curve denotes that there are 100 * 𝑥 percent of image pairs which have metric values no more than 𝑦.</figDesc><graphic coords="11,69.69,55.79,456.00,186.62" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_13"><head>Fig. 15 .</head><label>15</label><figDesc>Fig. 15. Quantitative comparisons of the six metrics, i.e., EN, MI, VIF, SF, SD and 𝑄 𝑎𝑏𝑓 , on 25 image pairs from the TNO dataset. A point (𝑥, 𝑦) on the curve denotes that there are 100 * 𝑥 percent of image pairs which have metric values no more than 𝑦.</figDesc><graphic coords="11,69.69,285.41,456.00,186.48" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_14"><head>Fig. 16 .</head><label>16</label><figDesc>Fig. 16. Segmentation results for infrared, visible and fused images from the MFNet dataset. The segmentation models are re-trained on infrared, visible and fused image sets. Each two rows represent a scene, and from top to bottom is: 00127D, 00504D and 01066N.</figDesc><graphic coords="12,69.61,55.79,456.24,405.79" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_15"><head>4. 8 .</head><label>8</label><figDesc>Training strategy comparisonWe propose a joint low-level and high-level adaptive training strategy to improve the fusion and segmentation performance across the board. In this section, we design training strategy comparison experiments to demonstrate the effectiveness of the proposed joint low-level and high-level adaptive training strategy. More specifically, besides the proposed training strategy, the one-stage joint training strategy is utilized for training the fusion network. Moreover, the segmentation models, trained respectively on infrared and visible image sets, are deployed to guide the training of the fusion network. Hence, three fusion models trained with different training strategies are leveraged as</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_16"><head>Fig. 17 .</head><label>17</label><figDesc>Fig. 17. Segmentation results for infrared, visible and fused images from the MFNet dataset. The segmentation model is Deeplabv3+, pre-trained on the Cityscapes dataset. Each two rows represent a scene, and from top to bottom is: 00275D and 00119D.</figDesc><graphic coords="13,69.61,55.79,456.24,255.89" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_17"><head>Fig. 18 .</head><label>18</label><figDesc>Fig. 18. Object detection results for infrared, visible and fused images from the MFNet dataset. The YOLOv5 detector, pre-trained on the Coco dataset is deployed to achieve object detection. Each two rows represent a scene, and from top to bottom is: 00479D and 00689N.</figDesc><graphic coords="13,69.61,354.61,456.24,259.20" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_18"><head>Fig. 19 .</head><label>19</label><figDesc>Fig. 19. Visualized results of ablation studies and different training strategies.</figDesc><graphic coords="14,69.61,55.79,456.24,131.04" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0"><head></head><label></label><figDesc></figDesc><graphic coords="2,69.61,55.79,456.24,122.26" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_0"><head>Table 1</head><label>1</label><figDesc>Segmentation performance (mIoU) of visible, infrared and fused images on the MFNet dataset. RED indicates the best result and BLUE represents the second best result.</figDesc><table><row><cell></cell><cell>Background</cell><cell>Car</cell><cell>Person</cell><cell>Bike</cell><cell>Curve</cell><cell>Car Stop</cell><cell>Cuardrail</cell><cell>Color Tone</cell><cell>Bump</cell><cell>mIoU</cell></row><row><cell>Visible</cell><cell>98.26</cell><cell>89.03</cell><cell>59.94</cell><cell>70.00</cell><cell>60.69</cell><cell>71.43</cell><cell>77.90</cell><cell>63.42</cell><cell>75.31</cell><cell>74.00</cell></row><row><cell>Infrared</cell><cell>98.24</cell><cell>87.33</cell><cell>70.46</cell><cell>69.23</cell><cell>58.74</cell><cell>68.85</cell><cell>65.57</cell><cell>56.93</cell><cell>72.72</cell><cell>72.01</cell></row><row><cell>GTF</cell><cell>98.44</cell><cell>89.12</cell><cell>71.76</cell><cell>72.04</cell><cell>64.47</cell><cell>70.59</cell><cell>68.95</cell><cell>63.71</cell><cell>74.40</cell><cell>74.83</cell></row><row><cell>MST-SR</cell><cell>98.50</cell><cell>90.03</cell><cell>72.21</cell><cell>71.45</cell><cell>62.75</cell><cell>70.21</cell><cell>75.78</cell><cell>65.44</cell><cell>77.84</cell><cell>76.02</cell></row><row><cell>DenseFuse</cell><cell>98.50</cell><cell>89.30</cell><cell>72.77</cell><cell>71.72</cell><cell>63.43</cell><cell>72.16</cell><cell>74.43</cell><cell>64.88</cell><cell>80.10</cell><cell>76.36</cell></row><row><cell>RFN-Nest</cell><cell>98.50</cell><cell>89.95</cell><cell>72.03</cell><cell>71.39</cell><cell>62.04</cell><cell>74.92</cell><cell>74.87</cell><cell>63.41</cell><cell>79.53</cell><cell>76.29</cell></row><row><cell>IFCNN</cell><cell>98.48</cell><cell>90.00</cell><cell>72.30</cell><cell>71.41</cell><cell>62.43</cell><cell>70.55</cell><cell>73.26</cell><cell>63.25</cell><cell>77.32</cell><cell>75.44</cell></row><row><cell>FusionGAN</cell><cell>98.49</cell><cell>89.86</cell><cell>72.83</cell><cell>71.95</cell><cell>63.45</cell><cell>71.68</cell><cell>79.45</cell><cell>64.35</cell><cell>75.36</cell><cell>76.38</cell></row><row><cell>GANMcC</cell><cell>98.47</cell><cell>89.26</cell><cell>72.11</cell><cell>71.74</cell><cell>62.71</cell><cell>72.94</cell><cell>74.05</cell><cell>63.26</cell><cell>77.42</cell><cell>75.77</cell></row><row><cell>U2Fusion</cell><cell>98.49</cell><cell>89.78</cell><cell>72.93</cell><cell>70.99</cell><cell>62.84</cell><cell>72.13</cell><cell>79.25</cell><cell>63.59</cell><cell>77.12</cell><cell>76.35</cell></row><row><cell>SDNet</cell><cell>98.52</cell><cell>89.58</cell><cell>73.41</cell><cell>71.61</cell><cell>63.68</cell><cell>75.59</cell><cell>75.31</cell><cell>61.82</cell><cell>75.43</cell><cell>76.11</cell></row><row><cell>Ours</cell><cell>98.61</cell><cell>90.43</cell><cell>74.30</cell><cell>72.18</cell><cell>65.01</cell><cell>74.08</cell><cell>85.25</cell><cell>66.50</cell><cell>81.41</cell><cell>78.64</cell></row></table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_2"><head>Table 3</head><label>3</label><figDesc>Mean and standard deviation of the running times of all methods on the MFNet, RoadScene and TNO datasets (unit: second, RED indicates the best result and BLUE represents the second best result).</figDesc><table><row><cell></cell><cell>MFNet</cell><cell>RoadScene</cell><cell>TNO</cell></row><row><cell>GTF</cell><cell>5.4498 ± 1.1383</cell><cell>3.7036 ± 2.6401</cell><cell>3.3130 ± 2.0961</cell></row><row><cell>MST-SR</cell><cell>0.6269 ± 0.0271</cell><cell>0.3147 ± 0.0786</cell><cell>0.6206 ± 0.3617</cell></row><row><cell>DenseFuse</cell><cell>0.2829 ± 0.1532</cell><cell>0.6065 ± 0.0804</cell><cell>0.6791 ± 0.2956</cell></row><row><cell>RFN-Nest</cell><cell>0.1924 ± 0.0901</cell><cell>0.1147 ± 0.0224</cell><cell>0.1951 ± 0.0979</cell></row><row><cell>FusionGAN</cell><cell>0.0681 ± 0.1090</cell><cell>0.4251 ± 0.0449</cell><cell>0.3267 ± 0.3286</cell></row><row><cell>GANMcC</cell><cell>0.1333 ± 0.1985</cell><cell>0.7171 ± 0.1932</cell><cell>0.6339 ± 0.6393</cell></row><row><cell>IFCNN</cell><cell>0.0160 ± 0.0781</cell><cell>0.0080 ± 0.0014</cell><cell>0.0123 ± 0.0059</cell></row><row><cell>U2Fusion</cell><cell>0.1352 ± 0.1350</cell><cell>0.7483 ± 0.0929</cell><cell>0.5507 ± 0.5186</cell></row><row><cell>SDNet</cell><cell>0.0154 ± 0.1105</cell><cell>0.1795 ± 0.0538</cell><cell>0.1465 ± 0.1628</cell></row><row><cell>SeAFusion</cell><cell>0.0115 ± 0.1081</cell><cell>0.0060 ± 0.0025</cell><cell>0.0049 ± 0.0017</cell></row></table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_3"><head>Table 4</head><label>4</label><figDesc>The segmentation performance of ablation studies and different training strategies. RED indicates the best result and BLUE represents the second best result.</figDesc><table><row><cell></cell><cell>Person</cell><cell>Car</cell><cell>Bike</cell><cell>mIoU</cell></row><row><cell>Without Semantic Loss</cell><cell>71.31</cell><cell>89.35</cell><cell>70.78</cell><cell>76.19</cell></row><row><cell>One-stage Joint Training</cell><cell>71.66</cell><cell>89.69</cell><cell>71.23</cell><cell>77.41</cell></row><row><cell>Pre-trained on Visible</cell><cell>60.20</cell><cell>88.99</cell><cell>69.91</cell><cell>74.01</cell></row><row><cell>Pre-trained on Infrared</cell><cell>70.16</cell><cell>86.83</cell><cell>68.42</cell><cell>70.90</cell></row><row><cell>SeAFusion</cell><cell>74.3</cell><cell>90.43</cell><cell>72.18</cell><cell>78.64</cell></row></table></figure>
+		</body>
+		<back>
+
+			<div type="acknowledgement">
+<div><head>Acknowledgment</head><p>This research was sponsored by the <rs type="funder">National Natural Science Foundation of China</rs> (<rs type="grantNumber">61773295</rs>).</p></div>
+			</div>
+			<listOrg type="funding">
+				<org type="funding" xml:id="_NQbB4MR">
+					<idno type="grant-number">61773295</idno>
+				</org>
+			</listOrg>
+
+			<div type="availability">
+<div xmlns="http://www.tei-c.org/ns/1.0"><p>//github.com/</p></div>
+			</div>
+
+			<div type="references">
+
+				<listBibl>
+
+<biblStruct xml:id="b0">
+	<analytic>
+		<title level="a" type="main">Image fusion meets deep learning: A survey and perspective</title>
+		<author>
+			<persName><forename type="first">H</forename><surname>Zhang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Xu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Tian</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Jiang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Ma</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Inf. Fusion</title>
+		<imprint>
+			<biblScope unit="volume">76</biblScope>
+			<biblScope unit="page" from="323" to="336" />
+			<date type="published" when="2021">2021</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b1">
+	<analytic>
+		<title level="a" type="main">Pedestrian detection with unsupervised multispectral feature learning using deep neural networks</title>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Cao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">D</forename><surname>Guan</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">W</forename><surname>Huang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Yang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Cao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Qiao</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Inf. Fusion</title>
+		<imprint>
+			<biblScope unit="volume">46</biblScope>
+			<biblScope unit="page" from="206" to="217" />
+			<date type="published" when="2019">2019</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b2">
+	<analytic>
+		<title level="a" type="main">Cross-modal ranking with soft consistency and noisy labels for robust RGB-T tracking</title>
+		<author>
+			<persName><forename type="first">C</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">C</forename><surname>Zhu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Huang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Tang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">L</forename><surname>Wang</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the European Conference on Computer Vision</title>
+		<meeting>the European Conference on Computer Vision</meeting>
+		<imprint>
+			<date type="published" when="2018">2018</date>
+			<biblScope unit="page" from="808" to="823" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b3">
+	<analytic>
+		<title level="a" type="main">Cross-modality person re-identification with shared-specific feature transfer</title>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Lu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Wu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">B</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">T</forename><surname>Zhang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">B</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Q</forename><surname>Chu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">N</forename><surname>Yu</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition</title>
+		<meeting>the IEEE Conference on Computer Vision and Pattern Recognition</meeting>
+		<imprint>
+			<date type="published" when="2020">2020</date>
+			<biblScope unit="page" from="13379" to="13389" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b4">
+	<analytic>
+		<title level="a" type="main">MFNet: Towards realtime semantic segmentation for autonomous vehicles with multi-spectral scenes</title>
+		<author>
+			<persName><forename type="first">Q</forename><surname>Ha</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">K</forename><surname>Watanabe</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">T</forename><surname>Karasawa</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Ushiku</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">T</forename><surname>Harada</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the IEEE International Conference on Intelligent Robots and Systems</title>
+		<meeting>the IEEE International Conference on Intelligent Robots and Systems</meeting>
+		<imprint>
+			<date type="published" when="2017">2017</date>
+			<biblScope unit="page" from="5108" to="5115" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b5">
+	<analytic>
+		<title level="a" type="main">RFN-nest: An end-to-end residual fusion network for infrared and visible images</title>
+		<author>
+			<persName><forename type="first">H</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X.-J</forename><surname>Wu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Kittler</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Inf. Fusion</title>
+		<imprint>
+			<biblScope unit="volume">73</biblScope>
+			<biblScope unit="page" from="720" to="786" />
+			<date type="published" when="2021">2021</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b6">
+	<analytic>
+		<title level="a" type="main">SDNet: A versatile squeeze-and-decomposition network for real-time image fusion</title>
+		<author>
+			<persName><forename type="first">H</forename><surname>Zhang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Ma</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Int. J. Comput. Vis</title>
+		<imprint>
+			<biblScope unit="volume">129</biblScope>
+			<biblScope unit="issue">10</biblScope>
+			<biblScope unit="page" from="2761" to="2785" />
+			<date type="published" when="2021">2021</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b7">
+	<analytic>
+		<title level="a" type="main">Perceptual fusion of infrared and visible images through a hybrid multi-scale decomposition with Gaussian and bilateral filters</title>
+		<author>
+			<persName><forename type="first">Z</forename><surname>Zhou</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">B</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">M</forename><surname>Dong</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Inf. Fusion</title>
+		<imprint>
+			<biblScope unit="volume">30</biblScope>
+			<biblScope unit="page" from="15" to="26" />
+			<date type="published" when="2016">2016</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b8">
+	<analytic>
+		<title level="a" type="main">Fast infrared and visible image fusion with structural decomposition</title>
+		<author>
+			<persName><forename type="first">H</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Qi</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">W</forename><surname>Xie</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Knowl.-Based Syst</title>
+		<imprint>
+			<biblScope unit="volume">204</biblScope>
+			<biblScope unit="page">106182</biblScope>
+			<date type="published" when="2020">2020</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b9">
+	<analytic>
+		<title level="a" type="main">Infrared and visible image fusion via gradientlet filter</title>
+		<author>
+			<persName><forename type="first">J</forename><surname>Ma</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Zhou</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Comput. Vis. Image Underst</title>
+		<imprint>
+			<biblScope unit="page">103016</biblScope>
+			<date type="published" when="2020">2020</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b10">
+	<analytic>
+		<title level="a" type="main">Region level based multi-focus image fusion using quaternion wavelet and normalized cut</title>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Jin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Q</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Shen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Dong</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Signal Process</title>
+		<imprint>
+			<biblScope unit="volume">97</biblScope>
+			<biblScope unit="page" from="9" to="30" />
+			<date type="published" when="2014">2014</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b11">
+	<analytic>
+		<title level="a" type="main">Structure tensor and nonsubsampled shearlet transform based algorithm for CT and MRI image fusion</title>
+		<author>
+			<persName><forename type="first">X</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">W</forename><surname>Mei</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Du</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Neurocomputing</title>
+		<imprint>
+			<biblScope unit="volume">235</biblScope>
+			<biblScope unit="page" from="131" to="139" />
+			<date type="published" when="2017">2017</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b12">
+	<analytic>
+		<title level="a" type="main">An adaptive fusion approach for infrared and visible images based on NSCT and compressed sensing</title>
+		<author>
+			<persName><forename type="first">Q</forename><surname>Zhang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Maldague</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Infrared Phys. Technol</title>
+		<imprint>
+			<biblScope unit="volume">74</biblScope>
+			<biblScope unit="page" from="11" to="20" />
+			<date type="published" when="2016">2016</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b13">
+	<analytic>
+		<title level="a" type="main">Infrared and visible image fusion based on target-enhanced multiscale transform decomposition</title>
+		<author>
+			<persName><forename type="first">J</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">L</forename><surname>Luo</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Mei</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Ma</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Inform. Sci</title>
+		<imprint>
+			<biblScope unit="volume">508</biblScope>
+			<biblScope unit="page" from="64" to="78" />
+			<date type="published" when="2020">2020</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b14">
+	<analytic>
+		<title level="a" type="main">MDLatLRR: A novel decomposition method for infrared and visible image fusion</title>
+		<author>
+			<persName><forename type="first">H</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X.-J</forename><surname>Wu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Kitler</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEEE Trans. Image Process</title>
+		<imprint>
+			<biblScope unit="volume">29</biblScope>
+			<biblScope unit="page" from="4733" to="4746" />
+			<date type="published" when="2020">2020</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b15">
+	<analytic>
+		<title level="a" type="main">Image fusion with convolutional sparse representation</title>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">R</forename><forename type="middle">K</forename><surname>Ward</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Z</forename><forename type="middle">J</forename><surname>Wang</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEEE Signal Process. Lett</title>
+		<imprint>
+			<biblScope unit="volume">23</biblScope>
+			<biblScope unit="issue">12</biblScope>
+			<biblScope unit="page" from="1882" to="1886" />
+			<date type="published" when="2016">2016</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b16">
+	<analytic>
+		<title level="a" type="main">Region-based multimodal image fusion using ICA bases</title>
+		<author>
+			<persName><forename type="first">N</forename><surname>Cvejic</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">D</forename><surname>Bull</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">N</forename><surname>Canagarajah</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEEE Sens. J</title>
+		<imprint>
+			<biblScope unit="volume">7</biblScope>
+			<biblScope unit="issue">5</biblScope>
+			<biblScope unit="page" from="743" to="751" />
+			<date type="published" when="2007">2007</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b17">
+	<analytic>
+		<title level="a" type="main">Image fusion based on non-negative matrix factorization and infrared feature extraction</title>
+		<author>
+			<persName><forename type="first">J</forename><surname>Mou</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">W</forename><surname>Gao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Z</forename><surname>Song</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the International Congress on Image and Signal Processing</title>
+		<meeting>the International Congress on Image and Signal Processing</meeting>
+		<imprint>
+			<date type="published" when="2013">2013</date>
+			<biblScope unit="page" from="1046" to="1050" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b18">
+	<analytic>
+		<title level="a" type="main">Infrared and visible images fusion based on RPCA and NSCT</title>
+		<author>
+			<persName><forename type="first">Z</forename><surname>Fu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Xu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">N</forename><surname>Zhou</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Zhao</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Infrared Phys. Technol</title>
+		<imprint>
+			<biblScope unit="volume">77</biblScope>
+			<biblScope unit="page" from="114" to="123" />
+			<date type="published" when="2016">2016</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b19">
+	<analytic>
+		<title level="a" type="main">Infrared and visible image fusion via gradient transfer and total variation minimization</title>
+		<author>
+			<persName><forename type="first">J</forename><surname>Ma</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">C</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">C</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Huang</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Inf. Fusion</title>
+		<imprint>
+			<biblScope unit="volume">31</biblScope>
+			<biblScope unit="page" from="100" to="109" />
+			<date type="published" when="2016">2016</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b20">
+	<analytic>
+		<title level="a" type="main">Infrared and visible image fusion based on visual saliency map and weighted least square optimization</title>
+		<author>
+			<persName><forename type="first">J</forename><surname>Ma</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Z</forename><surname>Zhou</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">B</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Zong</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Infrared Phys. Technol</title>
+		<imprint>
+			<biblScope unit="volume">82</biblScope>
+			<biblScope unit="page" from="8" to="17" />
+			<date type="published" when="2017">2017</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b21">
+	<analytic>
+		<title level="a" type="main">Densefuse: A fusion approach to infrared and visible images</title>
+		<author>
+			<persName><forename type="first">H</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X.-J</forename><surname>Wu</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEEE Trans. Image Process</title>
+		<imprint>
+			<biblScope unit="volume">28</biblScope>
+			<biblScope unit="issue">5</biblScope>
+			<biblScope unit="page" from="2614" to="2623" />
+			<date type="published" when="2018">2018</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b22">
+	<analytic>
+		<title level="a" type="main">Nestfuse: An infrared and visible image fusion architecture based on nest connection and spatial/channel attention models</title>
+		<author>
+			<persName><forename type="first">H</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X.-J</forename><surname>Wu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">T</forename><surname>Durrani</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEEE Trans. Instrum. Meas</title>
+		<imprint>
+			<biblScope unit="volume">69</biblScope>
+			<biblScope unit="issue">12</biblScope>
+			<biblScope unit="page" from="9645" to="9656" />
+			<date type="published" when="2020">2020</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b23">
+	<analytic>
+		<title level="a" type="main">IFCNN: A general image fusion framework based on convolutional neural network</title>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Zhang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">P</forename><surname>Sun</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Yan</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Zhao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">L</forename><surname>Zhang</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Inf. Fusion</title>
+		<imprint>
+			<biblScope unit="volume">54</biblScope>
+			<biblScope unit="page" from="99" to="118" />
+			<date type="published" when="2020">2020</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b24">
+	<analytic>
+		<title level="a" type="main">Fusiondn: A unified densely connected network for image fusion</title>
+		<author>
+			<persName><forename type="first">H</forename><surname>Xu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Ma</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Z</forename><surname>Le</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Jiang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Guo</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the AAAI Conference on Artificial Intelligence</title>
+		<meeting>the AAAI Conference on Artificial Intelligence</meeting>
+		<imprint>
+			<date type="published" when="2020">2020</date>
+			<biblScope unit="page" from="12484" to="12491" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b25">
+	<analytic>
+		<title level="a" type="main">STDFusionNet: An infrared and visible image fusion network based on salient target detection</title>
+		<author>
+			<persName><forename type="first">J</forename><surname>Ma</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">L</forename><surname>Tang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">M</forename><surname>Xu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Zhang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">G</forename><surname>Xiao</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEEE Trans. Instrum. Meas</title>
+		<imprint>
+			<biblScope unit="volume">70</biblScope>
+			<biblScope unit="page">5009513</biblScope>
+			<date type="published" when="2021">2021</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b26">
+	<monogr>
+		<title/>
+		<author>
+			<persName><forename type="first">L</forename><surname>Tang</surname></persName>
+		</author>
+		<imprint/>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b27">
+	<analytic>
+		<title level="a" type="main">FusionGAN: A generative adversarial network for infrared and visible image fusion</title>
+		<author>
+			<persName><forename type="first">J</forename><surname>Ma</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">W</forename><surname>Yu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">P</forename><surname>Liang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">C</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Jiang</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Inf. Fusion</title>
+		<imprint>
+			<biblScope unit="volume">48</biblScope>
+			<biblScope unit="page" from="11" to="26" />
+			<date type="published" when="2019">2019</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b28">
+	<analytic>
+		<title level="a" type="main">Infrared and visible image fusion via detail preserving adversarial learning</title>
+		<author>
+			<persName><forename type="first">J</forename><surname>Ma</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">P</forename><surname>Liang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">W</forename><surname>Yu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">C</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Guo</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Wu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Jiang</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Inf. Fusion</title>
+		<imprint>
+			<biblScope unit="volume">54</biblScope>
+			<biblScope unit="page" from="85" to="98" />
+			<date type="published" when="2020">2020</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b29">
+	<analytic>
+		<title level="a" type="main">DDcGAN: A dual-discriminator conditional generative adversarial network for multi-resolution image fusion</title>
+		<author>
+			<persName><forename type="first">J</forename><surname>Ma</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Xu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Jiang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Mei</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X.-P</forename><surname>Zhang</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEEE Trans. Image Process</title>
+		<imprint>
+			<biblScope unit="volume">29</biblScope>
+			<biblScope unit="page" from="4980" to="4995" />
+			<date type="published" when="2020">2020</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b30">
+	<analytic>
+		<title level="a" type="main">Infrared and visible image fusion using GAN with full-scale skip connection and dual Markovian discriminators</title>
+		<author>
+			<persName><forename type="first">H</forename><surname>Zhang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Yuan</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Tian</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Ma</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Gan-Fm</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEEE Trans. Comput. Imaging</title>
+		<imprint>
+			<biblScope unit="volume">7</biblScope>
+			<biblScope unit="page" from="1134" to="1147" />
+			<date type="published" when="2021">2021</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b31">
+	<monogr>
+		<author>
+			<persName><forename type="first">M</forename><surname>Haris</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">G</forename><surname>Shakhnarovich</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">N</forename><surname>Ukita</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1803.11316</idno>
+		<title level="m">Task-driven super resolution: Object detection in low-resolution images</title>
+		<imprint>
+			<date type="published" when="2018">2018</date>
+		</imprint>
+	</monogr>
+	<note type="report_type">arXiv preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b32">
+	<analytic>
+		<title level="a" type="main">Does haze removal help cnn-based image classification?</title>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Pei</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Huang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Q</forename><surname>Zou</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Lu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><surname>Wang</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the European Conference on Computer Vision</title>
+		<meeting>the European Conference on Computer Vision</meeting>
+		<imprint>
+			<date type="published" when="2018">2018</date>
+			<biblScope unit="page" from="682" to="697" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b33">
+	<analytic>
+		<title level="a" type="main">Single image deraining: A comprehensive benchmark analysis</title>
+		<author>
+			<persName><forename type="first">S</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">I</forename><forename type="middle">B</forename><surname>Araujo</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">W</forename><surname>Ren</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Z</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">E</forename><forename type="middle">K</forename><surname>Tokuda</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">R</forename><forename type="middle">H</forename><surname>Junior</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">R</forename><surname>Cesar-Junior</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Zhang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Guo</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Cao</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition</title>
+		<meeting>the IEEE Conference on Computer Vision and Pattern Recognition</meeting>
+		<imprint>
+			<date type="published" when="2019">2019</date>
+			<biblScope unit="page" from="3838" to="3847" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b34">
+	<analytic>
+		<title level="a" type="main">RXDNFuse: A aggregated residual dense network for infrared and visible image fusion</title>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Long</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Jia</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Zhong</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Jiang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Jia</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Inf. Fusion</title>
+		<imprint>
+			<biblScope unit="volume">69</biblScope>
+			<biblScope unit="page" from="128" to="141" />
+			<date type="published" when="2021">2021</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b35">
+	<analytic>
+		<title level="a" type="main">Semantic guided infrared and visible image fusion</title>
+		<author>
+			<persName><forename type="first">W</forename><surname>Wu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">D</forename><surname>Zhang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Hou</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">T</forename><surname>Lu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Zhou</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEICE Trans. Fundam. Electron. Commun. Comput. Sci</title>
+		<imprint>
+			<date type="published" when="2021">2021</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b36">
+	<analytic>
+		<title level="a" type="main">Infrared and visible image fusion via joint convolutional sparse representation</title>
+		<author>
+			<persName><forename type="first">M</forename><surname>Wu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Ma</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">F</forename><surname>Fan</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Mei</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Huang</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">J. Opt. Soc. Amer. A</title>
+		<imprint>
+			<biblScope unit="volume">37</biblScope>
+			<biblScope unit="issue">7</biblScope>
+			<biblScope unit="page" from="1105" to="1115" />
+			<date type="published" when="2020">2020</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b37">
+	<analytic>
+		<title level="a" type="main">A general framework for image fusion based on multi-scale transform and sparse representation</title>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Z</forename><surname>Wang</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Inf. Fusion</title>
+		<imprint>
+			<biblScope unit="volume">24</biblScope>
+			<biblScope unit="page" from="147" to="164" />
+			<date type="published" when="2015">2015</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b38">
+	<analytic>
+		<title level="a" type="main">Pixel-level image fusion: A survey of the state of the art</title>
+		<author>
+			<persName><forename type="first">S</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Kang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">L</forename><surname>Fang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Hu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Yin</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Inf. Fusion</title>
+		<imprint>
+			<biblScope unit="volume">33</biblScope>
+			<biblScope unit="page" from="100" to="112" />
+			<date type="published" when="2017">2017</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b39">
+	<analytic>
+		<title level="a" type="main">Classification saliency-based rule for visible and infrared image fusion</title>
+		<author>
+			<persName><forename type="first">H</forename><surname>Xu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Zhang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Ma</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEEE Trans. Comput. Imaging</title>
+		<imprint>
+			<biblScope unit="volume">7</biblScope>
+			<biblScope unit="page" from="824" to="836" />
+			<date type="published" when="2021">2021</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b40">
+	<analytic>
+		<title level="a" type="main">A medical image fusion method based on convolutional neural networks</title>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Cheng</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Peng</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the International Conference on Information Fusion</title>
+		<meeting>the International Conference on Information Fusion</meeting>
+		<imprint>
+			<date type="published" when="2017">2017</date>
+			<biblScope unit="page" from="1" to="7" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b41">
+	<analytic>
+		<title level="a" type="main">Rethinking the image fusion: A fast unified image fusion network based on proportional maintenance of gradient and intensity</title>
+		<author>
+			<persName><forename type="first">H</forename><surname>Zhang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Xu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Xiao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Guo</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Ma</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the AAAI Conference on Artificial Intelligence</title>
+		<meeting>the AAAI Conference on Artificial Intelligence</meeting>
+		<imprint>
+			<date type="published" when="2020">2020</date>
+			<biblScope unit="page" from="12797" to="12804" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b42">
+	<analytic>
+		<title level="a" type="main">U2fusion: A unified unsupervised image fusion network</title>
+		<author>
+			<persName><forename type="first">H</forename><surname>Xu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Ma</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Jiang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Guo</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Ling</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEEE Trans. Pattern Anal. Mach. Intell</title>
+		<imprint>
+			<biblScope unit="volume">44</biblScope>
+			<biblScope unit="issue">1</biblScope>
+			<biblScope unit="page" from="502" to="518" />
+			<date type="published" when="2022">2022</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b43">
+	<analytic>
+		<title level="a" type="main">Unpaired image-to-image translation using cycle-consistent adversarial networks</title>
+		<author>
+			<persName><forename type="first">J</forename><forename type="middle">Y</forename><surname>Zhu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">T</forename><surname>Park</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">P</forename><surname>Isola</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">A</forename><forename type="middle">A</forename><surname>Efros</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the IEEE International Conference on Computer Vision</title>
+		<meeting>the IEEE International Conference on Computer Vision</meeting>
+		<imprint>
+			<date type="published" when="2017">2017</date>
+			<biblScope unit="page" from="2223" to="2232" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b44">
+	<analytic>
+		<title level="a" type="main">Stargan: Unified generative adversarial networks for multi-domain image-to-image translation</title>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Choi</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">M</forename><surname>Choi</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">M</forename><surname>Kim</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J.-W</forename><surname>Ha</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><surname>Kim</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Choo</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition</title>
+		<meeting>the IEEE Conference on Computer Vision and Pattern Recognition</meeting>
+		<imprint>
+			<date type="published" when="2018">2018</date>
+			<biblScope unit="page" from="8789" to="8797" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b45">
+	<analytic>
+		<title level="a" type="main">Learning a generative model for fusing infrared and visible images via conditional generative adversarial network with dual discriminators</title>
+		<author>
+			<persName><forename type="first">H</forename><surname>Xu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">P</forename><surname>Liang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">W</forename><surname>Yu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Jiang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Ma</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the International Joint Conference on Artificial Intelligence</title>
+		<meeting>the International Joint Conference on Artificial Intelligence</meeting>
+		<imprint>
+			<date type="published" when="2019">2019</date>
+			<biblScope unit="page" from="3954" to="3960" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b46">
+	<analytic>
+		<title level="a" type="main">AttentionFGAN: Infrared and visible image fusion using attention-based generative adversarial networks</title>
+		<author>
+			<persName><forename type="first">J</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Huo</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">C</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">R</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Q</forename><surname>Feng</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEEE Trans. Multimed</title>
+		<imprint>
+			<biblScope unit="volume">23</biblScope>
+			<biblScope unit="page" from="1383" to="1396" />
+			<date type="published" when="2020">2020</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b47">
+	<analytic>
+		<title level="a" type="main">GANMcC: A generative adversarial network with multiclassification constraints for infrared and visible image fusion</title>
+		<author>
+			<persName><forename type="first">J</forename><surname>Ma</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Zhang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Z</forename><surname>Shao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">P</forename><surname>Liang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Xu</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEEE Trans. Instrum. Meas</title>
+		<imprint>
+			<biblScope unit="volume">70</biblScope>
+			<biblScope unit="page">5005014</biblScope>
+			<date type="published" when="2021">2021</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b48">
+	<analytic>
+		<title level="a" type="main">Aod-net: All-in-one dehazing network</title>
+		<author>
+			<persName><forename type="first">B</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Peng</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Z</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Xu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">D</forename><surname>Feng</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the IEEE International Conference on Computer Vision</title>
+		<meeting>the IEEE International Conference on Computer Vision</meeting>
+		<imprint>
+			<date type="published" when="2017">2017</date>
+			<biblScope unit="page" from="4770" to="4778" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b49">
+	<analytic>
+		<title level="a" type="main">When image denoising meets high-level vision tasks: A deep learning approach</title>
+		<author>
+			<persName><forename type="first">D</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">B</forename><surname>Wen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Z</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">T</forename><forename type="middle">S</forename><surname>Huang</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">27th International Joint Conference on Artificial Intelligence, International Joint Conferences on Artificial Intelligence</title>
+		<imprint>
+			<date type="published" when="2018">2018</date>
+			<biblScope unit="page" from="842" to="848" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b50">
+	<analytic>
+		<title level="a" type="main">Connecting image denoising and high-level vision tasks via deep learning</title>
+		<author>
+			<persName><forename type="first">D</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">B</forename><surname>Wen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Jiao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Z</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">T</forename><forename type="middle">S</forename><surname>Huang</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEEE Trans. Image Process</title>
+		<imprint>
+			<biblScope unit="volume">29</biblScope>
+			<biblScope unit="page" from="3695" to="3706" />
+			<date type="published" when="2020">2020</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b51">
+	<analytic>
+		<title level="a" type="main">High-level task-driven single image deraining: Segmentation in rainy days</title>
+		<author>
+			<persName><forename type="first">M</forename><surname>Guo</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">M</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">C</forename><surname>Ma</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Xie</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the International Conference on Neural Information Processing</title>
+		<meeting>the International Conference on Neural Information Processing</meeting>
+		<imprint>
+			<date type="published" when="2020">2020</date>
+			<biblScope unit="page" from="350" to="362" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b52">
+	<analytic>
+		<title level="a" type="main">Bilateral attention decoder: A lightweight decoder for real-time semantic segmentation</title>
+		<author>
+			<persName><forename type="first">C</forename><surname>Peng</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">T</forename><surname>Tian</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">C</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Guo</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Ma</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Neural Netw</title>
+		<imprint>
+			<biblScope unit="volume">137</biblScope>
+			<biblScope unit="page" from="188" to="199" />
+			<date type="published" when="2021">2021</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b53">
+	<monogr>
+		<title level="m" type="main">TNO image fusion dataset</title>
+		<author>
+			<persName><forename type="first">A</forename><surname>Toet</surname></persName>
+		</author>
+		<idno type="DOI">10.6084/m9.figshare.1008029.v1</idno>
+		<ptr target="https://figshare.com/articles/dataset/TNO_Image_Fusion_Dataset/1008029" />
+		<imprint>
+			<date type="published" when="2014">2014</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b54">
+	<analytic>
+		<title level="a" type="main">Assessment of image fusion procedures using entropy, image quality, and multispectral classification</title>
+		<author>
+			<persName><forename type="first">J</forename><forename type="middle">W</forename><surname>Roberts</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><forename type="middle">A</forename><surname>Van Aardt</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">F</forename><forename type="middle">B</forename><surname>Ahmed</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">J. Appl. Remote Sens</title>
+		<imprint>
+			<biblScope unit="volume">2</biblScope>
+			<biblScope unit="issue">1</biblScope>
+			<biblScope unit="page">23522</biblScope>
+			<date type="published" when="2008">2008</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b55">
+	<analytic>
+		<title level="a" type="main">Information measure for performance of image fusion</title>
+		<author>
+			<persName><forename type="first">G</forename><surname>Qu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">D</forename><surname>Zhang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">P</forename><surname>Yan</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Electron. Lett</title>
+		<imprint>
+			<biblScope unit="volume">38</biblScope>
+			<biblScope unit="issue">7</biblScope>
+			<biblScope unit="page" from="313" to="315" />
+			<date type="published" when="2002">2002</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b56">
+	<analytic>
+		<title level="a" type="main">A new image fusion performance metric based on visual information fidelity</title>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Han</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Cai</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Cao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Xu</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Inf. Fusion</title>
+		<imprint>
+			<biblScope unit="volume">14</biblScope>
+			<biblScope unit="issue">2</biblScope>
+			<biblScope unit="page" from="127" to="135" />
+			<date type="published" when="2013">2013</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b57">
+	<analytic>
+		<title level="a" type="main">Image quality measures and their performance</title>
+		<author>
+			<persName><forename type="first">A</forename><forename type="middle">M</forename><surname>Eskicioglu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">P</forename><forename type="middle">S</forename><surname>Fisher</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEEE Trans. Commun</title>
+		<imprint>
+			<biblScope unit="volume">43</biblScope>
+			<biblScope unit="issue">12</biblScope>
+			<biblScope unit="page" from="2959" to="2965" />
+			<date type="published" when="1995">1995</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b58">
+	<analytic>
+		<title level="a" type="main">Pytorch: An imperative style, high-performance deep learning library</title>
+		<author>
+			<persName><forename type="first">A</forename><surname>Paszke</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><surname>Gross</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">F</forename><surname>Massa</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">A</forename><surname>Lerer</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Bradbury</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">G</forename><surname>Chanan</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">T</forename><surname>Killeen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Z</forename><surname>Lin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">N</forename><surname>Gimelshein</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">L</forename><surname>Antiga</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Advances in Neural Information Processing Systems</title>
+		<imprint>
+			<date type="published" when="2019">2019</date>
+			<biblScope unit="page" from="8026" to="8037" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b59">
+	<analytic>
+		<title level="a" type="main">DeepFuse: A deep unsupervised approach for exposure fusion with extreme exposure image pairs</title>
+		<author>
+			<persName><forename type="first">K</forename><forename type="middle">Ram</forename><surname>Prabhakar</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">V</forename><surname>Sai</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">R</forename><surname>Srikar</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Venkatesh</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Babu</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the IEEE International Conference on Computer Vision</title>
+		<meeting>the IEEE International Conference on Computer Vision</meeting>
+		<imprint>
+			<date type="published" when="2017">2017</date>
+			<biblScope unit="page" from="4714" to="4722" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b60">
+	<analytic>
+		<title level="a" type="main">Encoder-decoder with atrous separable convolution for semantic image segmentation</title>
+		<author>
+			<persName><forename type="first">L</forename><forename type="middle">C</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Zhu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">G</forename><surname>Papandreou</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">F</forename><surname>Schroff</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Adam</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the European Conference on Computer Vision</title>
+		<meeting>the European Conference on Computer Vision</meeting>
+		<imprint>
+			<date type="published" when="2018">2018</date>
+			<biblScope unit="page" from="801" to="818" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b61">
+	<analytic>
+		<title level="a" type="main">The cityscapes dataset for semantic urban scene understanding</title>
+		<author>
+			<persName><forename type="first">M</forename><surname>Cordts</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">M</forename><surname>Omran</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><surname>Ramos</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">T</forename><surname>Rehfeld</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">M</forename><surname>Enzweiler</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">R</forename><surname>Benenson</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">U</forename><surname>Franke</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><surname>Roth</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">B</forename><surname>Schiele</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition</title>
+		<meeting>the IEEE Conference on Computer Vision and Pattern Recognition</meeting>
+		<imprint>
+			<date type="published" when="2016">2016</date>
+			<biblScope unit="page" from="3213" to="3223" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b62">
+	<analytic>
+		<title level="a" type="main">You only look once: Unified, real-time object detection</title>
+		<author>
+			<persName><forename type="first">J</forename><surname>Redmon</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><surname>Divvala</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">R</forename><surname>Girshick</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">A</forename><surname>Farhadi</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition</title>
+		<meeting>the IEEE Conference on Computer Vision and Pattern Recognition</meeting>
+		<imprint>
+			<date type="published" when="2016">2016</date>
+			<biblScope unit="page" from="779" to="788" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+				</listBibl>
+			</div>
+		</back>
+	</text>
+</TEI>
